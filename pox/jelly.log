@@ -1,19 +1,41 @@
 INFO:core:POX 0.2.0 (carp) is up.
-INFO:openflow.of_01:[00-00-00-00-00-03 1] connected
-INFO:openflow.of_01:[00-00-00-00-00-04 2] connected
+WARNING:openflow.of_01:<class 'pox.openflow.PacketIn'> raised on dummy OpenFlow nexus
+WARNING:openflow.of_01:<class 'pox.openflow.PacketIn'> raised on dummy OpenFlow nexus
+INFO:openflow.of_01:[00-00-00-00-00-03 2] connected
+INFO:openflow.of_01:[00-00-00-00-00-04 1] connected
 INFO:jelly_controller:packet in
 INFO:jelly_controller:packet in
 INFO:jelly_controller:packet in
 INFO:jelly_controller:packet in
+INFO:packet:(ipv6) warning IP packet data incomplete (114 of 169)
+INFO:packet:(dns) parsing questions: incomplete name
+INFO:jelly_controller:packet in
+INFO:jelly_controller:packet in
+INFO:packet:(ipv6) warning IP packet data incomplete (114 of 169)
+INFO:packet:(dns) parsing questions: incomplete name
+INFO:jelly_controller:packet in
+INFO:packet:(ipv6) warning IP packet data incomplete (114 of 157)
+INFO:packet:(dns) parsing answers: incomplete name
+INFO:jelly_controller:packet in
+INFO:jelly_controller:packet in
+INFO:jelly_controller:packet in
+INFO:packet:(ipv6) warning IP packet data incomplete (114 of 169)
+INFO:packet:(dns) parsing questions: incomplete name
 INFO:jelly_controller:packet in
 INFO:jelly_controller:packet in
 INFO:jelly_controller:packet in
 INFO:jelly_controller:packet in
+INFO:packet:(ipv6) warning IP packet data incomplete (114 of 169)
+INFO:packet:(dns) parsing questions: incomplete name
+INFO:jelly_controller:packet in
+INFO:jelly_controller:packet in
+INFO:packet:(ipv6) warning IP packet data incomplete (114 of 157)
+INFO:packet:(dns) parsing answers: incomplete name
 INFO:jelly_controller:packet in
 INFO:jelly_controller:packet in
 INFO:jelly_controller:packet in
-INFO:jelly_controller:packet in
-INFO:jelly_controller:packet in
+INFO:packet:(ipv6) warning IP packet data incomplete (114 of 157)
+INFO:packet:(dns) parsing answers: incomplete name
 INFO:jelly_controller:packet in
 INFO:jelly_controller:packet in
 INFO:jelly_controller:packet in
