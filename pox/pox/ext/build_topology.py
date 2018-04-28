@@ -19,9 +19,15 @@ import random
 class JellyFishTop(Topo):
     ''' TODO, build your topology here'''
 
-    k = 24 #Ports per switch
-    r = 10 #Ports dedicated to connecting to other ToR switches
-    num_switches = 49
+    k = 5 #Ports per switch #24
+    r = 4 #Ports dedicated to connecting to other ToR switches #10
+    num_switches = 10 #49
+
+    def portListContainsOther(self, port, portList):
+        for x in portList:
+            if x != port:
+                return True
+        return False
 
     def build(self):
 
@@ -29,45 +35,43 @@ class JellyFishTop(Topo):
         switchList = []
         portList = []
 
-        def portListContainsOther(self, port):
-            for x in portList:
-                if x != port:
-                    return True
-            return False
-
-        # Add all servers to the topology
-        for x in range((k-r)*num_switches):
 
         #Add all switches to the topology
-        for y in range(num_switches):
+        for y in range(self.num_switches):
             switchList.append(self.addSwitch('s%s' % (y)))
-            for j in range(k-r):
-                hostList.append(self.addHost('switch' + str(y) + 'h' + str(x)))
-                self.addLink(switchList[y], hostList.tail())
-            for x in range(r):
+            for j in range(self.k-self.r):
+                hostList.append(self.addHost('s' + str(y) + 'h' + str(j)))
+                self.addLink(switchList[y], hostList[-1])
+            for x in range(self.r):
                 portList.append(y)
 
-        for currentSwitch in range(num_switches):
+        for currentSwitch in range(self.num_switches):
 
             canConnect = []
             for z in range(len(switchList)):
                 is_neighbor = False
-                for link in switchList[currentSwitch].links():
-                    if z in link:
+                for link in self.links():
+                    if switchList[z] in link and switchList[currentSwitch] in link:
                         is_neighbor = True
                         break
 
                 if not is_neighbor and z in portList and z != currentSwitch:
                     canConnect.append(z)
 
-            while currentSwitch in portList and self.portListContainsOther(currentSwitch):
-                randPort = portList[random.randint(0, len(portList))]
+            while currentSwitch in portList and self.portListContainsOther(currentSwitch, portList):
+                randNum = random.randint(0, len(portList)-1)
+                print "randNum: " + str(randNum)
+                print "length of port list: " + str(len(portList))
+                randPort = portList[randNum]
                 while randPort == currentSwitch:
-                    randPort = portList[random.randint(0, len(portList))]
+                    randPort = portList[random.randint(0, len(portList)-1)]
 
                 portList.remove(randPort)
                 portList.remove(currentSwitch)
                 self.addLink(switchList[currentSwitch], switchList[randPort])
+
+        for x in self.links():
+            print x
 
 '''
 
