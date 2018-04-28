@@ -59,15 +59,14 @@ class JellyFishTop(Topo):
                     canConnect.append(z)
 
             while currentSwitch in portList and self.portListContainsOther(currentSwitch, portList):
-                randNum = random.randint(0, len(portList)-1)
+                randNum = random.randint(0, len(canConnect)-1)
                 print "randNum: " + str(randNum)
                 print "length of port list: " + str(len(portList))
-                randPort = portList[randNum]
-                while randPort == currentSwitch:
-                    randPort = portList[random.randint(0, len(portList)-1)]
+                randPort = canConnect[randNum]
 
                 portList.remove(randPort)
                 portList.remove(currentSwitch)
+                canConnect.remove(randPort)
                 self.addLink(switchList[currentSwitch], switchList[randPort])
 
         for x in self.links():
