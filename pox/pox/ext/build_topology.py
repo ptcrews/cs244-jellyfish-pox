@@ -29,6 +29,12 @@ class JellyFishTop(Topo):
         switchList = []
         portList = []
 
+        def portListContainsOther(self, port):
+            for x in portList:
+                if x != port:
+                    return True
+            return False
+
         # Add all servers to the topology
         for x in range((k-r)*num_switches):
 
@@ -40,6 +46,30 @@ class JellyFishTop(Topo):
                 self.addLink(switchList[y], hostList.tail())
             for x in range(r):
                 portList.append(y)
+
+        for currentSwitch in range(num_switches):
+
+            canConnect = []
+            for z in range(len(switchList)):
+                is_neighbor = False
+                for link in switchList[currentSwitch].links():
+                    if z in link:
+                        is_neighbor = True
+                        break
+
+                if not is_neighbor and z in portList and z != currentSwitch:
+                    canConnect.append(z)
+
+            while currentSwitch in portList and self.portListContainsOther(currentSwitch):
+                randPort = portList[random.randint(0, len(portList))]
+                while randPort == currentSwitch:
+                    randPort = portList[random.randint(0, len(portList))]
+
+                portList.remove(randPort)
+                portList.remove(currentSwitch)
+                self.addLink(switchList[currentSwitch], switchList[randPort])
+
+'''
 
         while(len(portList) > 1):
             freeSwitch1 = portList[random.randint(0, len(portList))]
@@ -55,7 +85,6 @@ class JellyFishTop(Topo):
 
             #So now we have a neighbor list
 
-                    
 
             randPort2 = portList[random.randint(0, len(portList))]
             if(randPort1 == randPort2):
@@ -68,7 +97,7 @@ class JellyFishTop(Topo):
             self.addLink(switchList[randPort1],switchList[randPort2])
             portList.remove(randPort1)
             portList.remove(randPort2)
-            
+            '''
 
         #leftHost = self.addHost( 'h1' )
         #rightHost = self.addHost( 'h2' )
