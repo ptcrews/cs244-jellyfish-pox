@@ -58,7 +58,7 @@ class JellyFishTop(Topo):
                 if not is_neighbor and z in portList and z != currentSwitch:
                     canConnect.append(z)
 
-            while currentSwitch in portList and self.portListContainsOther(currentSwitch, portList):
+            while currentSwitch in portList and len(canConnect) > 0:
                 if len(canConnect) == 1:
                     randNum = 0
                 else:
