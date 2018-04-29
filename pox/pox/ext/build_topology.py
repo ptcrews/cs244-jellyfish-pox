@@ -19,9 +19,9 @@ import random
 class JellyFishTop(Topo):
     ''' TODO, build your topology here'''
 
-    k = 3 #Ports per switch #24
-    r = 2 #Ports dedicated to connecting to other ToR switches #10
-    num_switches = 5 #49
+    k = 7 #Ports per switch #24
+    r = 5 #Ports dedicated to connecting to other ToR switches #10
+    num_switches = 10 #49
 
     def portListContainsOther(self, port, portList):
         for x in portList:
@@ -76,6 +76,7 @@ class JellyFishTop(Topo):
         for x in self.links():
             print x
 
+
 '''
 
         while(len(portList) > 1):
@@ -119,13 +120,26 @@ class JellyFishTop(Topo):
 
 def experiment(net):
         net.start()
-        sleep(3)
+        sleep(30)
         net.pingAll()
         net.stop()
 
 def main():
 	topo = JellyFishTop()
 	net = Mininet(topo=topo, host=CPULimitedHost, link = TCLink, controller=JELLYPOX)
+#        net.interact()
+        '''Now code to genereate the hosts and links for us in the topo visualizer
+        dumpFilename = "dump.txt"
+        dumpFile = open(dumpFilename, "w+")
+        #for node in self.values():
+        #    dumpFile.write( '%s\n' % repr( node ) )
+        dumpFile.write(str(net.do_dump()))
+        dumpFile.close()
+
+        linksFilename = "links.txt"
+        linksFile = open(linksFilename, "w+")
+        linksFile.write(str(net.links()))
+        linksFile.close()'''
 	experiment(net)
 
 if __name__ == "__main__":
