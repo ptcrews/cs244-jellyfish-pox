@@ -39,8 +39,8 @@ def launch (forwarding = "l2"):
   fw.launch()
   '''
 
-  import pox.ext.l2_multi as fw
-  import pox.forwarding.topo_proactive as fw
+  #import pox.ext.l2_multi as fw
+  import pox.ext.topo_proactive as fw
   core.getLogger().debug("Using forwarding: %s", fw.__name__)
   fw.launch()
   import pox.openflow.spanning_tree
