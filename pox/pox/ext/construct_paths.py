@@ -1,5 +1,3 @@
-# [sw1][sw2] -> (distance, intermediate)
-#path_map = defaultdict(lambda:defaultdict(lambda:(None,None)))
 from collections import defaultdict
 
 class Paths ():
@@ -16,10 +14,12 @@ class Paths ():
             '''
 
 
-    # Simple breadth first search
-    def dijkstra (self, adjacency, source, dest):
+    # Simple source - to - dest Dijkstra implementation
+    # switches = list of switch ids (e.g. switches_by_dpid.values())
+    def dijkstra (self, switches, adjacency, source, dest):
         # List of all the switches by dpid
-        Q = switches_by_dpid.values()
+        # TODO: Should probably be a set...
+        Q = switches
 
         dist = {}
         prev = {}
@@ -48,11 +48,58 @@ class Paths ():
         path = []
         u = dest
         while prev[u] != None:
-            path.insert(0, u)
+            # Push the next hop id and port
+            # Note that this link *must* exist in the adjacency graph
+            # TODO: Deeply consider whether to have the (node, port_to_get_to_node)
+            # or (node, egress_port) as the tuple
+            path.insert(0, (u, adjacency[prev[u]][u]))
             u = prev[u]
-        path.insert(0, u)
+        # Finally push ourselves and no port?
+        path.insert(0, (u, None))
 
         return path
+
+    # TODO: Many, numerous, incalcuable problems with all of this :/
+    def yen_ksp(switches, adjacency, source, dest, K):
+        A = []
+        # Find the shortest path
+        A.append(dijkstra(switches, adjacency, source, dest))
+
+        B = {}
+
+        # TODO: Off by one?
+        for k in range(1..K):
+            for i in range(len(A[k-1])-1):
+                spurNode = A[k-1][i][0] # Should retrieve i-th node
+
+                rootPath = A[k-1][0..i]
+
+                for p in A:
+                    if rootPath == p[0..i]:
+                        # TODO: Confirm removal here is correct
+                        adjacency[p[i]][p[i+1]] = None
+
+                for node in rootPath:
+                    if node != spurNode:
+                        continue
+                    # TODO: how to remove node from graph?? just invalidate edges?
+                    # remove node from Graph
+
+                spurPath = dijkstra(switches, adjacency, spurNode, dest)
+
+                totalPath = rootPath + spurPath
+                B.append(totalPath)
+
+                # Restore edges to graph... :/
+
+            if len(B) == 0:
+                break
+
+            B.sort()
+            A[k] = B[0]
+            B.pop()
+
+        return A
 
     def simple_test (self):
         switches = [0, 1, 2, 3, 4]
@@ -67,7 +114,7 @@ class Paths ():
         adjacency[2][4] = 1
         adjacency[3][1] = 0
         adjacency[4][2] = 0
-        print str(self.dijkstra(adjacency, 3, 4))
+        print str(self.dijkstra(switches, adjacency, 3, 4))
 
 if __name__ == "__main__":
     paths = Paths()
