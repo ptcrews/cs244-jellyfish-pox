@@ -19,9 +19,9 @@ import random
 class JellyFishTop(Topo):
     ''' TODO, build your topology here'''
 
-    k = 7 #Ports per switch #24
-    r = 5 #Ports dedicated to connecting to other ToR switches #10
-    num_switches = 10 #49
+    k = 24 #Ports per switch #24
+    r = 10 #Ports dedicated to connecting to other ToR switches #10
+    num_switches = 49 #49
 
     def portListContainsOther(self, port, portList):
         for x in portList:
@@ -40,7 +40,7 @@ class JellyFishTop(Topo):
         for y in range(self.num_switches):
             switchList.append(self.addSwitch('s%s' % (y)))
             for j in range(self.k-self.r):
-                hostList.append(self.addHost('s' + str(y) + 'h' + str(j)))
+                hostList.append(self.addHost('s' + str(y) + 'h' + str(j), ip = '0.0.0.0'))
                 self.addLink(switchList[y], hostList[-1])
             for x in range(self.r):
                 portList.append(y)
@@ -120,7 +120,7 @@ class JellyFishTop(Topo):
 
 def experiment(net):
         net.start()
-        sleep(30)
+        sleep(20)
         net.pingAll()
         net.stop()
 

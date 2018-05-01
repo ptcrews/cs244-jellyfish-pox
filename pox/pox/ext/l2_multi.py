@@ -108,6 +108,8 @@ def _get_raw_path (src, dst):
   Get a raw path (just a list of nodes to traverse)
   """
   if len(path_map) == 0: _calc_paths()
+  log.warning("hudson2!" + str(path_map))
+  log.warning("paul!" + str(path_map[src][dst]))
   if src is dst:
     # We're here!
     return []
