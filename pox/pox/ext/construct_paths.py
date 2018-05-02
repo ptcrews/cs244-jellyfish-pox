@@ -1,4 +1,5 @@
 from collections import defaultdict
+import random
 import copy
 
 class Paths ():
@@ -101,7 +102,7 @@ class Paths ():
         A = []
         # Find the shortest path
         A.append(self.dijkstra(switches, adjacency, source, dest))
-
+        print "Dijkstra result from " + str(source) + " to " + str(dest) + " is: " + str(A)
         B = []
 
         for k in range(1, K+1):
@@ -181,6 +182,59 @@ class Paths ():
         res = self.yen_ksp(switches, adjacency, 3, 4, 2)
         print "K shortest paths: " + str(res)
         self.all_k_shortest_paths(switches, adjacency, 2)
+
+    def count_distinct_paths(self, adjacency, switches, hosts):
+        distinct_path_count = copy.deepcopy(adjacency)
+
+        #set all elements in this adjacency copy to 0
+        for i in len(distinct_path_count):
+            for j in len(distinct_path_count[i]):
+                distinct_path_count[i][j] = 0
+
+        unmatchedServers = copy(hosts) #this is a list containing all servers which have not been paired with another random server
+        serverPairs = [] #List of tuples where each tuple is a pair of servers
+
+        while len(unmatchedServers) > 0: #Pair each server with another random, as of yet unpaired server
+            rand1 = random.randint(0, len(unmatchedServers))
+            rand2 = random.randint(0, len(unmatchedServers))
+            while rand2 == randServ1:
+                rand2 = random.randint(0, len(unmatchedServers))
+        
+            randServ1 = unmatchedServers[rand1]
+            randServ2 = unmatchedServers[rand2]
+            serverPairs.append((randServ1, randServ2))
+            unmatchedServers.remove(randServ1)
+            unmatchedServers.remove(randServ2)
+
+        #Now all servers have been paired
+
+        for pairing in serverPairs: #Run KSP for each pairing
+            paths = self.yen_ksp(switches, adjacency, pairing[0], pairing[1], 8) #KSP-8
+            for path in paths: #Iterate through each link in each path and increment accordingly
+                for nodeIndex in range(0, len(path)): 
+                    if nodeIndex < len(path) - 1: #Not the last node
+                        node1 = path[nodeIndex]
+                        node2 = path[nodeIndex + 1]
+                        #Link is represented as the connection of these two nodes in adjacency matrix
+                        #Increment count for both directions of this link, as done for figure 9
+                        distinct_path_count[node1][node2] += 1
+                        distinct_path_count[node2][node1] += 1
+            
+        #Finished!
+
+        #Convert this matrix into an ordered ranking of links that exist (requires comparing against adjacency)
+
+        pathCountList = [] #List of all pathCounts
+
+        for i in len(adjacency)
+            for j in len(adjacency[i])
+                if adjacency[i][j] == 1:
+                    pathCountList.append(distinct_path_count[i][j])
+
+        pathCountList.sort() #Modifies pathCountList
+
+        return distinct_path_count
+
 
 if __name__ == "__main__":
     paths = Paths()
