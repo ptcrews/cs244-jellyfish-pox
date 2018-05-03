@@ -148,7 +148,18 @@ class Paths ():
                 path_map[i][j] = res
                 print "Paths from " + str(i) + " to " + str(j) + " : " + str(res)
 
+    def ecmp (self, switches, adjacency, src, dst, K):
+        ksp = self.yen_ksp(switches, adjacency, src, dst, K)
+        print "ksp before sort: " + str(ksp)
+        ksp.sort(key=len)
+        print "ksp after sort: " + str(ksp)
+        shortest_path_length = len(ksp[0])
+        print "shortest length path is: " + str(shortest_path_length)
+        for path in ksp:
+            if len(path) > shortest_path_length:
+                ksp.remove(path)
 
+        return ksp
 
     def simple_test (self):
         switches = [0, 1, 2, 3, 4]
@@ -170,14 +181,27 @@ class Paths ():
         adjacency[0][4] = 1
         adjacency[4][0] = 1
 
-        #res = self.yen_ksp(switches, adjacency, 3, 4, 2)
-        #print "K shortest paths: " + str(res)
-        print str(self.count_distinct_paths(adjacency, switches, 2))
+#        res = self.yen_ksp(switches, adjacency, 3, 4, 2)
+#        ecmp_res = self.ecmp(switches, adjacency, 3, 4, 2)
+#        print "K shortest paths: " + str(res)
+#        print "ECMP-2: " + str(ecmp_res)
+        ksp_res = self.count_distinct_paths(adjacency, switches, 2, 0, None)
+        ecmp8_res = self.count_distinct_paths(adjacency, switches, 2, 1, ksp_res[1])
+        ecmp64_res = self.count_distinct_paths(adjacency, switches, 2, 2, ksp_res[1])
+
+
+        print "KSP Result: " + str(ksp_res[0])
+        print "ECMP-8 Result: " + str(ecmp8_res[0])
+        print "ECMP-64 Result: " + str(ecmp64_res[0])
+
+        self.plot_results(ksp_res[0], ecmp8_res[0], ecmp64_res[0])
+        
         #self.all_k_shortest_paths(switches, adjacency, 2)
 
 
 
-    def count_distinct_paths(self, adjacency, switches, hosts_per_switch):
+    def count_distinct_paths(self, adjacency, switches, hosts_per_switch, mode, serverPairs): #mode 0= KSP-8, mode 1=ECMP-8, mode 2=ECMP-64
+        #Pass serverPairs if you want to rerun this method with the same traffic permutation as a previous run
 
         hosts= []
 
@@ -199,8 +223,12 @@ class Paths ():
                 distinct_path_count[i][j] = 0
    #             print "Storing " + str(distinct_path_count[i][j]) + " in spot " + str(i) + "," + str(j)
 
-        unmatchedServers = copy.copy(hosts) #this is a list containing all servers which have not been paired with another random server
-        serverPairs = [] #List of tuples where each tuple is a pair of servers
+        unmatchedServers = []
+        if serverPairs is None: #Need to generate new traffic permutation
+            serverPairs = [] #List of tuples where each tuple is a pair of servers
+
+            unmatchedServers = copy.copy(hosts) #this is a list containing all servers which have not been paired with another random server
+
 
         while len(unmatchedServers) > 0: #Pair each server with another random, as of yet unpaired server
             if len(unmatchedServers) == 1:
@@ -223,7 +251,12 @@ class Paths ():
 
 
         for pairing in serverPairs: #Run KSP for each pairing
-            paths = self.yen_ksp(switches, adjacency, pairing[0], pairing[1], 2) #KSP-8
+            if mode == 0:
+                paths = self.yen_ksp(switches, adjacency, pairing[0], pairing[1], 8) #KSP-8
+            elif mode == 1:
+                paths = self.ecmp(switches, adjacency, pairing[0], pairing[1], 8) #ECMP-8
+            elif mode == 2:
+                paths = self.ecmp(switches, adjacency, pairing[0], pairing[1], 64) #ECMP-64
             print "Evaluating Pairing from " + str(pairing[0]) + " to " + str(pairing[1])
             #HostToSwitchPathCount.append(0)
             #HostToSwitchPathCount.append(0)
@@ -265,14 +298,19 @@ class Paths ():
 
         pathCountList.sort() #Modifies pathCountList
 
-        plt.plot(pathCountList)
+
+        return (pathCountList, serverPairs)
+
+    def plot_results(self, ksp_res, ecmp8_res, ecmp64_res):
+
+        ksp_line = plt.plot(ksp_res, label='8 Shortest Paths')
+        ecmp8_line = plt.plot(ecmp8_res, label='8-Way ECMP')
+        ecmp64_line = plt.plot(ecmp64_res, label='64-Way ECMP')
+        plt.legend()
         plt.ylabel('# Distinct Paths Link is on')
         plt.xlabel('Rank of Link')
         plt.grid()
         plt.show()
-
-        return pathCountList
-
 
 if __name__ == "__main__":
     paths = Paths()
