@@ -205,7 +205,7 @@ class Paths ():
     def simple_test (self):
         switches = [0, 1, 2, 3, 4, 5, 6, 7]
         n_ports = 3
-        hosts_per_switch = 2
+        hosts_per_switch = 24
         adjacency = defaultdict(lambda:defaultdict(lambda:(None,None)))
         # Simple tree topology
         adjacency[0][1] = 0
@@ -243,9 +243,13 @@ class Paths ():
 #        ecmp_res = self.ecmp(switches, adjacency, 3, 4, 2)
 #        print "K shortest paths: " + str(res)
 #        print "ECMP-2: " + str(ecmp_res)
+        adjacency2 = copy.deepcopy(adjacency)
+        adjacency3 = copy.deepcopy(adjacency)
+        switches2 = copy.deepcopy(switches)
+        switches3 = copy.deepcopy(switches)
         ksp_res = self.count_distinct_paths(adjacency, switches, hosts_per_switch, KSP_MODE, None)
-        ecmp8_res = self.count_distinct_paths(adjacency, switches, hosts_per_switch, ECMP8_MODE, ksp_res[1])
-        ecmp64_res = self.count_distinct_paths(adjacency, switches, hosts_per_switch, ECMP64_MODE, ksp_res[1])
+        ecmp8_res = self.count_distinct_paths(adjacency2, switches2, hosts_per_switch, ECMP8_MODE, ksp_res[1])
+        ecmp64_res = self.count_distinct_paths(adjacency3, switches3, hosts_per_switch, ECMP64_MODE, ksp_res[1])
 
 
         print "KSP Result: " + str(ksp_res[0])
@@ -364,7 +368,7 @@ class Paths ():
         ksp_line = plt.plot(ksp_res, label='8 Shortest Paths')
         ecmp8_line = plt.plot(ecmp8_res, label='8-Way ECMP')
         ecmp64_line = plt.plot(ecmp64_res, label='64-Way ECMP')
-        plt.legend()
+        plt.legend(loc=2)
         plt.ylabel('# Distinct Paths Link is on')
         plt.xlabel('Rank of Link')
         plt.grid()
