@@ -3,6 +3,10 @@ import matplotlib.pyplot as plt
 import random
 import copy
 
+KSP_MODE = 0
+ECMP8_MODE = 1
+ECMP64_MODE = 2
+
 class Paths ():
     adjacency = defaultdict(lambda:defaultdict(lambda:(None,None)))
     path_map = defaultdict(lambda:defaultdict(lambda:(None,None)))
@@ -159,12 +163,59 @@ class Paths ():
                 path_map[i][j] = res
                 print "Paths from " + str(i) + " to " + str(j) + " : " + str(res)
 
+    def ecmp (self, switches, adjacency, src, dst, K):
+        ksp = self.yen_ksp(switches, adjacency, src, dst, K)
+        '''ksp8 = self.yen_ksp(switches, adjacency, src, dst, 8)
+        print "KSP8 is: " + str(ksp8)
+        ksp64 = self.yen_ksp(switches, adjacency, src, dst, 64)
+        quit = 0
+        if len(ksp64) < len(ksp8):
+            print "ERROR!! KSP8 found more paths"
+            quit = 1
+        for path in ksp8:
+            path_in_ksp64 = 0
+            for path64 in ksp64:
+                if path64 == path:
+                    print "match"
+                    path_in_ksp64 = 1
+                    break
+            print "hi"
+            if path_in_ksp64 == 0:
+                print "ERROR: path: " + str(path) + " is in ksp8 but not ksp64"
+                exit()
+        print "KSP64 is: " + str(ksp64)
+        print "ksp before sort: " + str(ksp)'''
+        ksp.sort(key=len)
+        '''        ksp64.sort(key=len)
+        ksp8.sort(key=len)
+        print "ksp after sort: " + str(ksp)'''
+        shortest_path_length = len(ksp[0])
+        '''        print "shortest length path ksp8 is: " + str(len(ksp8[0]))
+        print "shortest length path ksp64 is: " + str(len(ksp64[0]))
+        if quit == 1:
+            exit()
+            while(1):
+                print "FAILURE"'''
+        for path in ksp:
+            if len(path) > shortest_path_length:
+                ksp.remove(path)
 
+        '''        for path in ksp8:
+            if len(path) > len(ksp8[0]):
+                ksp8.remove(path)
+        for path in ksp64:
+            if len(path) > len(ksp64[0]):
+                ksp64.remove(path)
+        if(len(ksp8) > len(ksp64)):
+            print "ERROR NUMBER 2"
+            exit()'''
+        return ksp
 
     def simple_test (self):
-        switches = [0, 1, 2, 3, 4]
-        n_ports = 2
-        self.adjacency = defaultdict(lambda:defaultdict(lambda:(None,None)))
+        switches = [0, 1, 2, 3, 4, 5, 6, 7]
+        n_ports = 3
+        hosts_per_switch = 24
+        adjacency = defaultdict(lambda:defaultdict(lambda:(None,None)))
         # Simple tree topology
         self.adjacency[0][1] = 0
         self.adjacency[1][0] = 0
@@ -178,17 +229,50 @@ class Paths ():
         self.adjacency[2][4] = 1
         self.adjacency[4][2] = 1
 
-        self.adjacency[0][4] = 1
-        self.adjacency[4][0] = 1
+        adjacency[1][7] = 1
+        adjacency[7][1] = 1
 
-        #res = self.yen_ksp(switches, adjacency, 3, 4, 2)
-        #print "K shortest paths: " + str(res)
-        print str(self.count_distinct_paths(self.adjacency, switches, 2))
+        adjacency[7][4] = 1
+        adjacency[4][7] = 1
+
+        adjacency[6][4] = 1
+        adjacency[4][6] = 1
+
+        adjacency[7][5] = 1
+        adjacency[5][7] = 1
+
+        adjacency[5][6] = 0
+        adjacency[6][5] = 0
+
+        adjacency[5][0] = 2
+        adjacency[0][5] = 2
+
+
+#        res = self.yen_ksp(switches, adjacency, 3, 4, 2)
+#        ecmp_res = self.ecmp(switches, adjacency, 3, 4, 2)
+#        print "K shortest paths: " + str(res)
+#        print "ECMP-2: " + str(ecmp_res)
+        adjacency2 = copy.deepcopy(adjacency)
+        adjacency3 = copy.deepcopy(adjacency)
+        switches2 = copy.deepcopy(switches)
+        switches3 = copy.deepcopy(switches)
+        ksp_res = self.count_distinct_paths(adjacency, switches, hosts_per_switch, KSP_MODE, None)
+        ecmp8_res = self.count_distinct_paths(adjacency2, switches2, hosts_per_switch, ECMP8_MODE, ksp_res[1])
+        ecmp64_res = self.count_distinct_paths(adjacency3, switches3, hosts_per_switch, ECMP64_MODE, ksp_res[1])
+
+
+        print "KSP Result: " + str(ksp_res[0])
+        print "ECMP-8 Result: " + str(ecmp8_res[0])
+        print "ECMP-64 Result: " + str(ecmp64_res[0])
+
+        self.plot_results(ksp_res[0], ecmp8_res[0], ecmp64_res[0])
+        
         #self.all_k_shortest_paths(switches, adjacency, 2)
 
 
 
-    def count_distinct_paths(self, adjacency, switches, hosts_per_switch):
+    def count_distinct_paths(self, adjacency, switches, hosts_per_switch, mode, serverPairs): #mode 0= KSP-8, mode 1=ECMP-8, mode 2=ECMP-64
+        #Pass serverPairs if you want to rerun this method with the same traffic permutation as a previous run
 
         hosts= []
 
@@ -210,8 +294,12 @@ class Paths ():
                 distinct_path_count[i][j] = 0
    #             print "Storing " + str(distinct_path_count[i][j]) + " in spot " + str(i) + "," + str(j)
 
-        unmatchedServers = copy.copy(hosts) #this is a list containing all servers which have not been paired with another random server
-        serverPairs = [] #List of tuples where each tuple is a pair of servers
+        unmatchedServers = []
+        if serverPairs is None: #Need to generate new traffic permutation
+            serverPairs = [] #List of tuples where each tuple is a pair of servers
+
+            unmatchedServers = copy.copy(hosts) #this is a list containing all servers which have not been paired with another random server
+
 
         while len(unmatchedServers) > 0: #Pair each server with another random, as of yet unpaired server
             if len(unmatchedServers) == 1:
@@ -234,7 +322,12 @@ class Paths ():
 
 
         for pairing in serverPairs: #Run KSP for each pairing
-            paths = self.yen_ksp(switches, adjacency, pairing[0], pairing[1], 2) #KSP-8
+            if mode == 0:
+                paths = self.yen_ksp(switches, adjacency, pairing[0], pairing[1], 8) #KSP-8
+            elif mode == 1:
+                paths = self.ecmp(switches, adjacency, pairing[0], pairing[1], 8) #ECMP-8
+            elif mode == 2:
+                paths = self.ecmp(switches, adjacency, pairing[0], pairing[1], 64) #ECMP-64
             print "Evaluating Pairing from " + str(pairing[0]) + " to " + str(pairing[1])
             #HostToSwitchPathCount.append(0)
             #HostToSwitchPathCount.append(0)
@@ -276,14 +369,19 @@ class Paths ():
 
         pathCountList.sort() #Modifies pathCountList
 
-        plt.plot(pathCountList)
+
+        return (pathCountList, serverPairs)
+
+    def plot_results(self, ksp_res, ecmp8_res, ecmp64_res):
+
+        ksp_line = plt.plot(ksp_res, label='8 Shortest Paths')
+        ecmp8_line = plt.plot(ecmp8_res, label='8-Way ECMP')
+        ecmp64_line = plt.plot(ecmp64_res, label='64-Way ECMP')
+        plt.legend(loc=2)
         plt.ylabel('# Distinct Paths Link is on')
         plt.xlabel('Rank of Link')
         plt.grid()
         plt.show()
-
-        return pathCountList
-
 
 if __name__ == "__main__":
     paths = Paths()
