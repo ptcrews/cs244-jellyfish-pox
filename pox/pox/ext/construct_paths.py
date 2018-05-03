@@ -178,7 +178,7 @@ class Paths ():
 
         hosts= []
 
-        print "Switch count in count_paths is: " + str(len(switches))
+#        print "Switch count in count_paths is: " + str(len(switches))
 
         for switchNum in switches:
             for j in range (0, hosts_per_switch):
@@ -189,12 +189,12 @@ class Paths ():
         distinct_path_count = copy.deepcopy(adjacency)
 
         #set all elements in this adjacency copy to 0
-        print "len(dist_path_count is: " + str(len(distinct_path_count))
+    #    print "len(dist_path_count is: " + str(len(distinct_path_count))
         for i in distinct_path_count:
 #            print "len(dist_path_count[i]) is : " + str(len(distinct_path_count[i]))
             for j in distinct_path_count[i]:
                 distinct_path_count[i][j] = 0
-                print "Storing " + str(distinct_path_count[i][j]) + " in spot " + str(i) + "," + str(j)
+   #             print "Storing " + str(distinct_path_count[i][j]) + " in spot " + str(i) + "," + str(j)
 
         unmatchedServers = copy.copy(hosts) #this is a list containing all servers which have not been paired with another random server
         serverPairs = [] #List of tuples where each tuple is a pair of servers
@@ -207,7 +207,7 @@ class Paths ():
             rand2 = random.randint(0, len(unmatchedServers) - 1)
             while rand2 == rand1:
                 rand2 = random.randint(0, len(unmatchedServers) - 1)
-            print "Rand1 is: " + str(rand1) + " and len(unamatched) is " + str(len(unmatchedServers)) 
+  #          print "Rand1 is: " + str(rand1) + " and len(unamatched) is " + str(len(unmatchedServers)) 
             randServ1 = unmatchedServers[rand1]
             randServ2 = unmatchedServers[rand2]
             serverPairs.append((randServ1, randServ2))
@@ -232,7 +232,7 @@ class Paths ():
                         node2 = path[nodeIndex + 1][0]
                         #Link is represented as the connection of these two nodes in adjacency matrix
                         #Increment count for both directions of this link, as done for figure 9
-                        print "Host1 in this link: " + str(node1) + " Host2 in this link: " + str(node2) + " Current number of other distinct paths that have traversed this link: " + str(distinct_path_count[node1][node2]) + " which should be equal to " + str(distinct_path_count[node2][node1])
+ #                       print "Host1 in this link: " + str(node1) + " Host2 in this link: " + str(node2) + " Current number of other distinct paths that have traversed this link: " + str(distinct_path_count[node1][node2]) + " which should be equal to " + str(distinct_path_count[node2][node1])
                         
                         distinct_path_count[node1][node2] += 1
                         distinct_path_count[node2][node1] += 1
