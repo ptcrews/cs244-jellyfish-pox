@@ -1,4 +1,5 @@
 from collections import defaultdict
+import matplotlib.pyplot as plt
 import random
 import copy
 
@@ -102,7 +103,7 @@ class Paths ():
         A = []
         # Find the shortest path
         A.append(self.dijkstra(switches, adjacency, source, dest))
-        print "Dijkstra result from " + str(source) + " to " + str(dest) + " is: " + str(A)
+ #       print "Dijkstra result from " + str(source) + " to " + str(dest) + " is: " + str(A)
         B = []
 
         for k in range(1, K+1):
@@ -146,6 +147,8 @@ class Paths ():
                 res = self.yen_ksp(switches, adjacency, i, j, K)
                 path_map[i][j] = res
                 print "Paths from " + str(i) + " to " + str(j) + " : " + str(res)
+
+
 
     def simple_test (self):
         switches = [0, 1, 2, 3, 4]
@@ -254,6 +257,7 @@ class Paths ():
             for j in adjacency[i]:
                 if adjacency[i][j] is not None:
                     pathCountList.append(distinct_path_count[i][j])
+                    print "Link from switch " + str(i) + " to " + str(j) + " is on " + str(distinct_path_count[i][j]) + " distinct paths." 
                 elif distinct_path_count[i][j] is not None:
                     print "ERROR: COunted on link where none should exist"
                 else:
@@ -261,7 +265,13 @@ class Paths ():
 
         pathCountList.sort() #Modifies pathCountList
 
-        return distinct_path_count
+        plt.plot(pathCountList)
+        plt.ylabel('# Distinct Paths Link is on')
+        plt.xlabel('Rank of Link')
+        plt.grid()
+        plt.show()
+
+        return pathCountList
 
 
 if __name__ == "__main__":
