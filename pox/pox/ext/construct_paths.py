@@ -4,17 +4,19 @@ import random
 import copy
 
 class Paths ():
+    adjacency = defaultdict(lambda:defaultdict(lambda:(None,None)))
+    path_map = defaultdict(lambda:defaultdict(lambda:(None,None)))
     # Adjacency map.  [sw1][sw2] -> port from sw1 to sw2
-    '''
-    def __init__ (self, adjacency_map, switches_by_dpid):
-        sws = switches_by_dpid.values()
+    def __init__ (self, topo=None):
+        if topo == None:
+            return
+
+        switches = topo.switches()
+        adjacency.clear()
         path_map.clear()
-        for k in sws:
-            for j,port in adjacency[k].iteritems():
-                if port is None: continue
-                path_map[k][j] = (1,None)
-            path_map[k][k] = (0,None) # distance, intermediate
-            '''
+
+        for link in topo.links():
+            print link
 
 
     # Simple source - to - dest Dijkstra implementation
