@@ -158,26 +158,14 @@ class Paths ():
         adjacency[0][2] = 1
         adjacency[2][0] = 1
 
-        adjacency[1][0] = 0
-        adjacency[0][1] = 0
-
         adjacency[1][3] = 1
         adjacency[3][1] = 1
-
-        adjacency[2][0] = 0
-        adjacency[0][2] = 0
 
         adjacency[2][4] = 1
         adjacency[4][2] = 1
 
-        adjacency[3][1] = 0
-        adjacency[1][3] = 0
-
-        adjacency[4][2] = 0
-        adjacency[2][4] = 0
-
-        adjacency[3][4] = 1
-        adjacency[4][3] = 1
+        adjacency[0][4] = 1
+        adjacency[4][0] = 1
 
         #res = self.yen_ksp(switches, adjacency, 3, 4, 2)
         #print "K shortest paths: " + str(res)
@@ -204,9 +192,9 @@ class Paths ():
         print "len(dist_path_count is: " + str(len(distinct_path_count))
         for i in distinct_path_count:
 #            print "len(dist_path_count[i]) is : " + str(len(distinct_path_count[i]))
-            for j in distinct_path_count[j]:
+            for j in distinct_path_count[i]:
                 distinct_path_count[i][j] = 0
-                print str(distinct_path_count[i][j])
+                print "Storing " + str(distinct_path_count[i][j]) + " in spot " + str(i) + "," + str(j)
 
         unmatchedServers = copy.copy(hosts) #this is a list containing all servers which have not been paired with another random server
         serverPairs = [] #List of tuples where each tuple is a pair of servers
@@ -232,8 +220,8 @@ class Paths ():
 
 
         for pairing in serverPairs: #Run KSP for each pairing
-            paths = self.yen_ksp(switches, adjacency, pairing[0], pairing[1], 8) #KSP-8
-
+            paths = self.yen_ksp(switches, adjacency, pairing[0], pairing[1], 2) #KSP-8
+            print "Evaluating Pairing from " + str(pairing[0]) + " to " + str(pairing[1])
             #HostToSwitchPathCount.append(0)
             #HostToSwitchPathCount.append(0)
 
@@ -244,10 +232,16 @@ class Paths ():
                         node2 = path[nodeIndex + 1][0]
                         #Link is represented as the connection of these two nodes in adjacency matrix
                         #Increment count for both directions of this link, as done for figure 9
-                        print str(distinct_path_count[node1][node2])
+                        print "Host1 in this link: " + str(node1) + " Host2 in this link: " + str(node2) + " Current number of other distinct paths that have traversed this link: " + str(distinct_path_count[node1][node2]) + " which should be equal to " + str(distinct_path_count[node2][node1])
+                        
                         distinct_path_count[node1][node2] += 1
                         distinct_path_count[node2][node1] += 1
+
+                        if distinct_path_count[node2][node1] !=  distinct_path_count[node1][node2]:
+                            print "ERROR - some link was not counted in both directions: 1,2 gives: " + str(distinct_path_count[node1][node2]) + " while 2,1 gives: " + str(distinct_path_count[node2][node1])
+
             
+                        #print "AFTER INCREMENT Host1 in this link: " + str(node1) + " Host2 in this link: " + str(node2) + " Current number of other distinct paths that have traversed this link: " + str(distinct_path_count[node1][node2])
         #Finished calculating for all links between switches. However, the design of yen_ksp
         # means that links from host -> switch have not yet been considered. Im not sure if I
         # should be counting those anyway
