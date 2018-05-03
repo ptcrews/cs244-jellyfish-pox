@@ -101,19 +101,21 @@ def main():
     net = Mininet(topo=topo, host=CPULimitedHost, link = TCLink, controller=JELLYPOX)
     paths = Paths(net)
     #paths.all_k_shortest_paths()
-#        net.interact()
-        '''Now code to genereate the hosts and links for us in the topo visualizer
-        dumpFilename = "dump.txt"
-        dumpFile = open(dumpFilename, "w+")
-        #for node in self.values():
-        #    dumpFile.write( '%s\n' % repr( node ) )
-        dumpFile.write(str(net.do_dump()))
-        dumpFile.close()
+#   net.interact()
+    '''
+    Now code to genereate the hosts and links for us in the topo visualizer
+    dumpFilename = "dump.txt"
+    dumpFile = open(dumpFilename, "w+")
+    #for node in self.values():
+    #    dumpFile.write( '%s\n' % repr( node ) )
+    dumpFile.write(str(net.do_dump()))
+    dumpFile.close()
 
-        linksFilename = "links.txt"
-        linksFile = open(linksFilename, "w+")
-        linksFile.write(str(net.links()))
-        linksFile.close()'''
+    linksFilename = "links.txt"
+    linksFile = open(linksFilename, "w+")
+    linksFile.write(str(net.links()))
+    linksFile.close()
+    '''
     experiment(net)
 
 if __name__ == "__main__":
