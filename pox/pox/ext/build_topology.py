@@ -14,6 +14,8 @@ from subprocess import Popen
 from time import sleep, time
 import random
 
+from construct_paths import Path
+
 
 
 class JellyFishTop(Topo):
@@ -77,36 +79,6 @@ class JellyFishTop(Topo):
             print x
 
 
-'''
-
-        while(len(portList) > 1):
-            freeSwitch1 = portList[random.randint(0, len(portList))]
-
-            currentNeighbors = []
-
-            for link in self.links():
-                if freeSwitch1 in link:
-                    if link[0] != freeSwitch1:
-                        currentNeighbors.append(link[0])
-                    else:
-                        currentNeighbors.append(link[1])
-
-            #So now we have a neighbor list
-
-
-            randPort2 = portList[random.randint(0, len(portList))]
-            if(randPort1 == randPort2):
-                continue
-            tupleToAdd = (switchList[randPort1], switchList[randPort2])
-            tupleToAddReverse = (switchList[randPort2], switchList[randPort1])
-            if(tupleToAdd in self.links() or tupleToAddReverse in self.links):
-                continue
-            
-            self.addLink(switchList[randPort1],switchList[randPort2])
-            portList.remove(randPort1)
-            portList.remove(randPort2)
-            '''
-
         #leftHost = self.addHost( 'h1' )
         #rightHost = self.addHost( 'h2' )
         #leftSwitch = self.addSwitch( 's3' )
@@ -125,8 +97,10 @@ def experiment(net):
         net.stop()
 
 def main():
-	topo = JellyFishTop()
-	net = Mininet(topo=topo, host=CPULimitedHost, link = TCLink, controller=JELLYPOX)
+    topo = JellyFishTop()
+    net = Mininet(topo=topo, host=CPULimitedHost, link = TCLink, controller=JELLYPOX)
+    paths = Paths(net)
+    #paths.all_k_shortest_paths()
 #        net.interact()
         '''Now code to genereate the hosts and links for us in the topo visualizer
         dumpFilename = "dump.txt"
@@ -140,8 +114,8 @@ def main():
         linksFile = open(linksFilename, "w+")
         linksFile.write(str(net.links()))
         linksFile.close()'''
-	experiment(net)
+    experiment(net)
 
 if __name__ == "__main__":
-	main()
+    main()
 
