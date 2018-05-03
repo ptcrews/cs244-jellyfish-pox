@@ -14,16 +14,16 @@ from subprocess import Popen
 from time import sleep, time
 import random
 
-from construct_paths import Path
+from construct_paths import Paths
 
 
 
 class JellyFishTop(Topo):
     ''' TODO, build your topology here'''
 
-    k = 24 #Ports per switch #24
-    r = 10 #Ports dedicated to connecting to other ToR switches #10
-    num_switches = 49 #49
+    k = 5 #Ports per switch #24
+    r = 3 #Ports dedicated to connecting to other ToR switches #10
+    num_switches = 5 #49
 
     def portListContainsOther(self, port, portList):
         for x in portList:
@@ -100,7 +100,7 @@ def main():
     topo = JellyFishTop()
     net = Mininet(topo=topo, host=CPULimitedHost, link = TCLink, controller=JELLYPOX)
     paths = Paths(net)
-    #paths.all_k_shortest_paths()
+    paths.all_k_shortest_paths(paths.switches_by_dpid, 2)
 #   net.interact()
     '''
     Now code to genereate the hosts and links for us in the topo visualizer

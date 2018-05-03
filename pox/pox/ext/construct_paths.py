@@ -6,17 +6,26 @@ import copy
 class Paths ():
     adjacency = defaultdict(lambda:defaultdict(lambda:(None,None)))
     path_map = defaultdict(lambda:defaultdict(lambda:(None,None)))
+    switches_by_dpid = []
     # Adjacency map.  [sw1][sw2] -> port from sw1 to sw2
     def __init__ (self, topo=None):
         if topo == None:
             return
 
-        switches = topo.switches()
-        adjacency.clear()
-        path_map.clear()
+        self.adjacency.clear()
+        self.path_map.clear()
 
-        for link in topo.links():
-            print link
+        for switch in topo.switches:
+            self.switches_by_dpid.append(switch.dpid)
+
+        for link in topo.links:
+            first_node = link.intf1.node
+            second_node = link.intf2.node
+            if first_node in topo.switches and second_node in topo.switches:
+                first_dpid = first_node.dpid
+                second_dpid = second_node.dpid
+                self.adjacency[first_dpid][second_dpid] = 1
+                self.adjacency[second_dpid][first_dpid] = 1
 
 
     # Simple source - to - dest Dijkstra implementation
@@ -36,9 +45,9 @@ class Paths ():
         dist[source] = 0
 
         while len(Q) > 0:
-            min_found = float('Inf')
+            min_found = None
             for u in Q:
-                if dist[u] < min_found:
+                if min_found == None or dist[u] < dist[min_found]:
                     min_found = u
 
             # No path found
@@ -46,13 +55,15 @@ class Paths ():
                 return []
 
             Q.remove(min_found)
-            if min_found == dest:
-                break
 
-            for v,port in adjacency[min_found].iteritems():
-                if dist[min_found] + 1 < dist[v] and port != None:
+            for v in adjacency[min_found]:
+                port = adjacency[min_found][v]
+                if dist[min_found] + 1 < dist[v]:
                     dist[v] = dist[min_found] + 1
                     prev[v] = min_found
+
+            if min_found == dest:
+                break
 
         path = []
         prev_node = dest
@@ -68,14 +79,12 @@ class Paths ():
         return path
 
     def delete_node(self, adjacency, switches, node):
-        for i in range(len(switches)):
+        for i in switches:
             self.remove_edges(adjacency, node, i)
 
     def dump(self, adjacency):
         for node in adjacency:
-            print "Node: " + str(node)
             for connected in adjacency[node]:
-                print "\t Connected to " + str(connected) + " with value " + \
                     str(adjacency[node][connected])
 
     #def check_integrity
@@ -108,7 +117,7 @@ class Paths ():
  #       print "Dijkstra result from " + str(source) + " to " + str(dest) + " is: " + str(A)
         B = []
 
-        for k in range(1, K+1):
+        for k in range(1, K):
             for i in range(0, len(A[k-1])-1):
                 adjacency_copy = copy.deepcopy(adjacency)
                 spurNode = A[k-1][i] # Should retrieve i-th node
@@ -142,11 +151,11 @@ class Paths ():
 
         return A
 
-    def all_k_shortest_paths (self, switches, adjacency, K):
+    def all_k_shortest_paths (self, switches, K):
         path_map = defaultdict(lambda:defaultdict(lambda:(None,None)))
         for i in switches:
             for j in switches:
-                res = self.yen_ksp(switches, adjacency, i, j, K)
+                res = self.yen_ksp(switches, self.adjacency, i, j, K)
                 path_map[i][j] = res
                 print "Paths from " + str(i) + " to " + str(j) + " : " + str(res)
 
@@ -155,26 +164,26 @@ class Paths ():
     def simple_test (self):
         switches = [0, 1, 2, 3, 4]
         n_ports = 2
-        adjacency = defaultdict(lambda:defaultdict(lambda:(None,None)))
+        self.adjacency = defaultdict(lambda:defaultdict(lambda:(None,None)))
         # Simple tree topology
-        adjacency[0][1] = 0
-        adjacency[1][0] = 0
+        self.adjacency[0][1] = 0
+        self.adjacency[1][0] = 0
 
-        adjacency[0][2] = 1
-        adjacency[2][0] = 1
+        self.adjacency[0][2] = 1
+        self.adjacency[2][0] = 1
 
-        adjacency[1][3] = 1
-        adjacency[3][1] = 1
+        self.adjacency[1][3] = 1
+        self.adjacency[3][1] = 1
 
-        adjacency[2][4] = 1
-        adjacency[4][2] = 1
+        self.adjacency[2][4] = 1
+        self.adjacency[4][2] = 1
 
-        adjacency[0][4] = 1
-        adjacency[4][0] = 1
+        self.adjacency[0][4] = 1
+        self.adjacency[4][0] = 1
 
         #res = self.yen_ksp(switches, adjacency, 3, 4, 2)
         #print "K shortest paths: " + str(res)
-        print str(self.count_distinct_paths(adjacency, switches, 2))
+        print str(self.count_distinct_paths(self.adjacency, switches, 2))
         #self.all_k_shortest_paths(switches, adjacency, 2)
 
 
