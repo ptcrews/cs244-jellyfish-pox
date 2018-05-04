@@ -21,9 +21,9 @@ from construct_paths import Paths
 class JellyFishTop(Topo):
     ''' TODO, build your topology here'''
 
-    k = 5 #Ports per switch #24
-    r = 3 #Ports dedicated to connecting to other ToR switches #10
-    num_switches = 5 #49
+    k = 36 #Ports per switch #24
+    r = 13 #Ports dedicated to connecting to other ToR switches #10
+    num_switches = 212 #49
 
     def portListContainsOther(self, port, portList):
         for x in portList:
@@ -100,7 +100,17 @@ def main():
     topo = JellyFishTop()
     net = Mininet(topo=topo, host=CPULimitedHost, link = TCLink, controller=JELLYPOX)
     paths = Paths(net)
-    paths.all_k_shortest_paths(paths.switches_by_dpid, 2)
+#    paths.all_k_shortest_paths(paths.switches_by_dpid, 2)
+    hosts_per_switch = 23
+    ksp_res = paths.count_distinct_paths(hosts_per_switch, 0, None)
+    ecmp8_res = paths.count_distinct_paths(hosts_per_switch, 1, ksp_res[1])
+    ecmp64_res = paths.count_distinct_paths(hosts_per_switch, 2, ksp_res[1])
+    print "KSP Result: " + str(ksp_res[0])
+    print "ECMP-8 Result: " + str(ecmp8_res[0])
+    print "ECMP-64 Result: " + str(ecmp64_res[0])
+
+    paths.plot_results(ksp_res[0], ecmp8_res[0], ecmp64_res[0])
+
 #   net.interact()
     '''
     Now code to genereate the hosts and links for us in the topo visualizer
@@ -116,7 +126,7 @@ def main():
     linksFile.write(str(net.links()))
     linksFile.close()
     '''
-    experiment(net)
+    #experiment(net)
 
 if __name__ == "__main__":
     main()
