@@ -4,6 +4,9 @@ import random
 import copy
 import ast
 
+MODE = KSP_MODE
+K_VAL = 8
+
 KSP_MODE = 0
 ECMP8_MODE = 1
 ECMP64_MODE = 2
@@ -14,11 +17,11 @@ class Paths ():
     switches_by_dpid = []
     # Adjacency map.  [sw1][sw2] -> port from sw1 to sw2
     def __init__ (self, topo=None):
-        if topo == None:
-            return
-
         self.adjacency.clear()
         self.path_map.clear()
+
+        if topo == None:
+            return
 
         for switch in topo.switches:
             self.switches_by_dpid.append(switch.dpid)
@@ -31,6 +34,12 @@ class Paths ():
                 second_dpid = second_node.dpid
                 self.adjacency[first_dpid][second_dpid] = 1
                 self.adjacency[second_dpid][first_dpid] = 1
+
+    def get_paths(switchlist, adjacency, src, dst):
+        # Recomptues all paths if path_map is empty
+        if len(path_map) == 0:
+            self.compute_all_paths(path_map, switchlist, adjacency)
+        return path_map[src][dst]
 
 
     # Simple source - to - dest Dijkstra implementation
@@ -156,13 +165,17 @@ class Paths ():
 
         return A
 
-    def all_k_shortest_paths (self, switches, K):
-        path_map = defaultdict(lambda:defaultdict(lambda:(None,None)))
+    def compute_all_paths (self, path_map, switches, adjacency):
+        path_map.clear()
         for i in switches:
             for j in switches:
-                res = self.yen_ksp(switches, self.adjacency, i, j, K)
+                if MODE == KSP_MODE:
+                    res = self.yen_ksp(switches, adjacency, i, j, K_VAL)
+                else if MODE == ECMP8_MODE:
+                    res = self.ecmp(switches, adjacency, i, j, 8)
+                else # MODE == ECMP64_MODE
+                    res = self.ecmp(switches, adjacency, i, j, 64)
                 path_map[i][j] = res
-                print "Paths from " + str(i) + " to " + str(j) + " : " + str(res)
 
     def ecmp (self, switches, adjacency, src, dst, K):
         ksp = self.yen_ksp(switches, adjacency, src, dst, K)

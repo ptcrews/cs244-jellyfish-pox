@@ -16,8 +16,6 @@ import random
 
 from construct_paths import Paths
 
-
-
 class JellyFishTop(Topo):
     ''' TODO, build your topology here'''
 

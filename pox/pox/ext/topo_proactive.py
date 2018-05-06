@@ -39,6 +39,7 @@ from pox.proto.dhcpd import DHCPLease, DHCPD
 from collections import defaultdict
 from pox.openflow.discovery import Discovery
 import time
+from construct_paths import Paths
 
 log = core.getLogger("f.t_p")
 
@@ -53,11 +54,13 @@ switches_by_id = {}
 # [sw1][sw2] -> (distance, intermediate)
 path_map = defaultdict(lambda:defaultdict(lambda:(None,None)))
 
+paths = Paths()
 
 def dpid_to_mac (dpid):
   return EthAddr("%012x" % (dpid & 0xffFFffFFffFF,))
 
 
+'''
 def _calc_paths ():
   """
   Essentially Floyd-Warshall algorithm
@@ -135,6 +138,13 @@ def _get_path (src, dst):
     in_port = adjacency[s2][s1]
 
   return r
+'''
+
+def _get_paths (src, dst):
+    if src == dst:
+        return []
+    else:
+        return paths.get_paths(switches_by_dpid, adjacency, src, dst)
 
 
 def ipinfo (ip):
@@ -472,7 +482,7 @@ class topo_addressing (object):
 
 
 
-def launch (debug = False):
+def launch (topo, debug = False):
   core.registerNew(topo_addressing)
   from proto.arp_helper import launch
   launch(eat_packets=False)
