@@ -4,12 +4,12 @@ import random
 import copy
 import ast
 
-MODE = KSP_MODE
 K_VAL = 8
 
 KSP_MODE = 0
 ECMP8_MODE = 1
 ECMP64_MODE = 2
+MODE = KSP_MODE
 
 class Paths ():
     adjacency = defaultdict(lambda:defaultdict(lambda:(None,None)))
@@ -35,7 +35,7 @@ class Paths ():
                 self.adjacency[first_dpid][second_dpid] = 1
                 self.adjacency[second_dpid][first_dpid] = 1
 
-    def get_paths(switchlist, adjacency, src, dst):
+    def get_paths(self, path_map, switchlist, adjacency, src, dst):
         # Recomptues all paths if path_map is empty
         if len(path_map) == 0:
             self.compute_all_paths(path_map, switchlist, adjacency)
@@ -171,9 +171,9 @@ class Paths ():
             for j in switches:
                 if MODE == KSP_MODE:
                     res = self.yen_ksp(switches, adjacency, i, j, K_VAL)
-                else if MODE == ECMP8_MODE:
+                elif MODE == ECMP8_MODE:
                     res = self.ecmp(switches, adjacency, i, j, 8)
-                else # MODE == ECMP64_MODE
+                else: # MODE == ECMP64_MODE
                     res = self.ecmp(switches, adjacency, i, j, 64)
                 path_map[i][j] = res
 
