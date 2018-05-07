@@ -40,7 +40,7 @@ def launch ():
   '''
 
   #import pox.ext.l2_multi as fw
-  import pox.ext.topo_proactive as fw
+  import pox.forwarding.l3_learning as fw
   core.getLogger().debug("Using forwarding: %s", fw.__name__)
   fw.launch()
   #import pox.openflow.spanning_tree

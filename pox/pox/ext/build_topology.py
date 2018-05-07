@@ -19,9 +19,9 @@ from construct_paths import Paths
 class JellyFishTop(Topo):
     ''' TODO, build your topology here'''
 
-    k = 24 #Ports per switch #24
-    r = 10 #Ports dedicated to connecting to other ToR switches #10
-    num_switches = 49 #49
+    k = 5 #Ports per switch #24
+    r = 3 #Ports dedicated to connecting to other ToR switches #10
+    num_switches = 4 #49
 
     def portListContainsOther(self, port, portList):
         for x in portList:
@@ -41,7 +41,8 @@ class JellyFishTop(Topo):
         for y in range(self.num_switches):
             switchList.append(self.addSwitch('s%s' % (y)))
             for j in range(self.k-self.r):
-                host = self.addHost('h' + str(counter), ip='0.0.0.0')
+                switchString = str(y)
+                host = self.addHost('h' + str(counter), ip='10.' + str(y+1) + '.' + str(j+1) + '.1')
                 hostList.append(host)
                 self.addLink(switchList[y], hostList[-1], bw=10)
                 counter += 1
@@ -100,14 +101,14 @@ def experiment(net):
 def main():
     topo = JellyFishTop()
     net = Mininet(topo=topo, host=CPULimitedHost, link = TCLink, controller=JELLYPOX)
-    net.start()
+    #net.start()
     # NOTE: Must come after net.start
-    for host in net.hosts:
-        print str(host)
-        print str(host.defaultIntf().name)
-	host.cmdPrint('dhclient '+host.defaultIntf().name)
-    CLI(net)
-    net.stop()
+#    for host in net.hosts:
+#        print str(host)
+#        print str(host.defaultIntf().name)
+#	host.cmdPrint('dhclient '+host.defaultIntf().name)
+#    CLI(net)
+#    net.stop()
     #paths = Paths(net)
 #    paths.all_k_shortest_paths(paths.switches_by_dpid, 2)
     '''
@@ -137,7 +138,7 @@ def main():
     linksFile.write(str(net.links()))
     linksFile.close()
     '''
-#    experiment(net)
+    experiment(net)
 
 if __name__ == "__main__":
     main()
