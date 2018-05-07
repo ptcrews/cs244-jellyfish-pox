@@ -16,7 +16,8 @@ class Paths ():
     path_map = defaultdict(lambda:defaultdict(lambda:(None,None)))
     switches_by_dpid = []
     # Adjacency map.  [sw1][sw2] -> port from sw1 to sw2
-    def __init__ (self, topo=None):
+    def __init__ (self, log, topo=None):
+        self.log = log
         if topo == None:
             return
 
@@ -36,11 +37,17 @@ class Paths ():
                 self.adjacency[first_dpid][second_dpid] = 1
                 self.adjacency[second_dpid][first_dpid] = 1
 
+    def compute_paths(self, switchlist, adjacency, log):
+        log.debug("First")
+        self.path_map.clear()
+        log.debug("Second")
+        self.compute_all_paths(self.path_map, switchlist, adjacency, log)
+
     def get_paths(self, log, path_map, switchlist, adjacency, src, dst):
         # Recomptues all paths if path_map is empty
         #if len(path_map) == 0:
-	self.compute_all_paths(path_map, switchlist, adjacency)
-        return path_map[src][dst]
+	#self.compute_all_paths(path_map, switchlist, adjacency)
+        return self.path_map[src][dst]
 
 
     # Simple source - to - dest Dijkstra implementation
@@ -129,6 +136,7 @@ class Paths ():
     # Heavily inspired by the Wikipedia psuedo-code for Yen's K shortest paths
     # algorithm
     def yen_ksp(self, switches, adjacency, source, dest, K):
+	if self.log != None: self.log.debug("Yen for: " + str(source) + " " + str(dest))
         A = []
         # Find the shortest path
         A.append(self.dijkstra(switches, adjacency, source, dest))
@@ -171,10 +179,12 @@ class Paths ():
 
             A.append(self.find_remove_min(B))
 
+	if self.log != None: self.log.debug("End Yen for: " + str(source) + " " + str(dest))
         return A
 
-    def compute_all_paths (self, path_map, switches, adjacency):
+    def compute_all_paths (self, path_map, switches, adjacency, log):
         path_map.clear()
+        log.debug("Here")
         for i in switches:
             for j in switches:
                 if MODE == KSP_MODE:

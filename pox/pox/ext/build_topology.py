@@ -19,9 +19,9 @@ from construct_paths import Paths
 class JellyFishTop(Topo):
     ''' TODO, build your topology here'''
 
-    k = 24 #Ports per switch #24
-    r = 10 #Ports dedicated to connecting to other ToR switches #10
-    num_switches = 49 #49
+    k = 5#Ports per switch #24
+    r = 3#Ports dedicated to connecting to other ToR switches #10
+    num_switches = 5#49
 
     def portListContainsOther(self, port, portList):
         for x in portList:

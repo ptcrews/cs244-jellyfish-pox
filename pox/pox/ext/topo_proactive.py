@@ -54,104 +54,24 @@ switches_by_id = {}
 # [sw1][sw2] -> (distance, intermediate)
 path_map = defaultdict(lambda:defaultdict(lambda:(None,None)))
 
-paths = Paths()
+paths = Paths(log)
 
 def dpid_to_mac (dpid):
   return EthAddr("%012x" % (dpid & 0xffFFffFFffFF,))
 
-
-'''
-def _calc_paths ():
-  """
-  Essentially Floyd-Warshall algorithm
-  """
-
-  def dump ():
-    for i in sws:
-      for j in sws:
-        a = path_map[i][j][0]
-        #a = adjacency[i][j]
-        if a is None: a = "*"
-        print a,
-      print
-
-  sws = switches_by_dpid.values()
-  path_map.clear()
-  for k in sws:
-    for j,port in adjacency[k].iteritems():
-      if port is None: continue
-      path_map[k][j] = (1,None)
-    path_map[k][k] = (0,None) # distance, intermediate
-
-  #dump()
-
-  for k in sws:
-    for i in sws:
-      for j in sws:
-        if path_map[i][k][0] is not None:
-          if path_map[k][j][0] is not None:
-            # i -> k -> j exists
-            ikj_dist = path_map[i][k][0]+path_map[k][j][0]
-            if path_map[i][j][0] is None or ikj_dist < path_map[i][j][0]:
-              # i -> k -> j is better than existing
-              path_map[i][j] = (ikj_dist, k)
-
-  #print "--------------------"
-  #dump()
-
-
-def _get_raw_path (src, dst):
-  """
-  Get a raw path (just a list of nodes to traverse)
-  """
-  if len(path_map) == 0: _calc_paths()
-  if src is dst:
-    # We're here!
-    return []
-  if path_map[src][dst][0] is None:
-    return None
-  intermediate = path_map[src][dst][1]
-  if intermediate is None:
-    # Directly connected
-    return []
-  return _get_raw_path(src, intermediate) + [intermediate] + \
-         _get_raw_path(intermediate, dst)
-
-
-def _get_path (src, dst):
-  """
-  Gets a cooked path -- a list of (node,out_port)
-  """
-  # Start with a raw path...
-  if src == dst:
-    path = [src]
-  else:
-    path = _get_raw_path(src, dst)
-    if path is None: return None
-    path = [src] + path + [dst]
-
-  # Now add the ports
-  r = []
-  for s1,s2 in zip(path[:-1],path[1:]):
-    out_port = adjacency[s1][s2]
-    r.append((s1,out_port))
-    in_port = adjacency[s2][s1]
-
-  return r
-'''
+def compute_paths():
+    log.debug("Timer fired: COMPUTING PATHS")
+    log.debug("Len: " + str(len(switches_by_dpid.values())))
+    paths.compute_paths(switches_by_dpid.values(), adjacency, log)
+    log.debug("Timer fired: END COMPUTING PATHS")
+    for sw in switches_by_dpid.itervalues():
+      sw.send_table()
+    log.debug("After table sending")
 
 def _get_paths (src, dst):
     if src == dst:
-        return []
+        return [[]]
     else:
-        log.debug("Switches: " + str(type(switches_by_dpid.values())))
-        log.debug("START DUMP")
-        for sws in switches_by_dpid.values():
-            log.debug("Single switch: " + str(type(sws))) 
-        for adj in adjacency:
-            for adj2 in adjacency[adj]:
-                log.debug("Adj: " + str(adj) + " " + str(adj2) + " " + str(adjacency[adj][adj2]))
-        log.debug("END DUMP")
         return paths.get_paths(log, path_map, switches_by_dpid.values(), adjacency, src, dst)
 
 
@@ -226,10 +146,8 @@ class TopoSwitch (DHCPD):
 
     src = self
     for dst in switches_by_dpid.itervalues():
-      log.debug("DEST FOR SWITCH ITERVALUES: " + str(dst))
       if dst is src: continue
       paths = _get_paths(src, dst)
-      log.debug("Got path: " + str(paths) + " " + str(len(paths)))
       p = paths[0]
       if p is None or len(p) == 0: continue
 
@@ -461,7 +379,6 @@ class topo_addressing (object):
             # Yup, link goes both ways
             adjacency[sw1][sw2] = ll.port1
             adjacency[sw2][sw1] = ll.port2
-            log.debug("Added to adjacency: " + str(sw1) + " " + str(sw2) + " " + str(ll.port1))
             # Fixed -- new link chosen to connect these
             break
     else:
@@ -475,7 +392,6 @@ class topo_addressing (object):
           # Yup, link goes both ways -- connected!
           adjacency[sw1][sw2] = l.port1
           adjacency[sw2][sw1] = l.port2
-          log.debug("Added to adjacency: " + str(sw1) + " " + str(sw2) + " " + str(l.port1))
 
     for sw in switches_by_dpid.itervalues():
       sw.send_table()
@@ -499,5 +415,7 @@ def launch (debug = False):
   core.registerNew(topo_addressing)
   from proto.arp_helper import launch
   launch(eat_packets=False)
+  # Normally 360
+  core.callDelayed(60, compute_paths)
   if not debug:
     core.getLogger("proto.arp_helper").setLevel(99)
