@@ -17,11 +17,12 @@ class Paths ():
     switches_by_dpid = []
     # Adjacency map.  [sw1][sw2] -> port from sw1 to sw2
     def __init__ (self, topo=None):
+        if topo == None:
+            return
+
         self.adjacency.clear()
         self.path_map.clear()
 
-        if topo == None:
-            return
 
         for switch in topo.switches:
             self.switches_by_dpid.append(switch.dpid)
@@ -35,10 +36,10 @@ class Paths ():
                 self.adjacency[first_dpid][second_dpid] = 1
                 self.adjacency[second_dpid][first_dpid] = 1
 
-    def get_paths(self, path_map, switchlist, adjacency, src, dst):
+    def get_paths(self, log, path_map, switchlist, adjacency, src, dst):
         # Recomptues all paths if path_map is empty
-        if len(path_map) == 0:
-            self.compute_all_paths(path_map, switchlist, adjacency)
+        #if len(path_map) == 0:
+	self.compute_all_paths(path_map, switchlist, adjacency)
         return path_map[src][dst]
 
 
@@ -47,7 +48,10 @@ class Paths ():
     def dijkstra (self, switches, adjacency, source, dest):
         # List of all the switches by dpid
         # TODO: Should probably be a set...
-        Q = copy.deepcopy(switches)
+        Q = []
+        for sws in switches:
+            Q.append(sws)
+        #Q = copy.deepcopy(switches)
 
         dist = {}
         prev = {}
@@ -72,7 +76,7 @@ class Paths ():
 
             for v in adjacency[min_found]:
                 port = adjacency[min_found][v]
-                if dist[min_found] + 1 < dist[v]:
+                if port != None and dist[min_found] + 1 < dist[v]:
                     dist[v] = dist[min_found] + 1
                     prev[v] = min_found
 
@@ -81,7 +85,7 @@ class Paths ():
 
         path = []
         prev_node = dest
-        path.insert(0, (prev_node, None))
+        #path.insert(0, (prev_node, None))
         while prev_node in prev and prev[prev_node] != None:
             cur_node = prev[prev_node]
             path.insert(0, (cur_node, adjacency[cur_node][prev_node]))
@@ -130,10 +134,14 @@ class Paths ():
         A.append(self.dijkstra(switches, adjacency, source, dest))
  #       print "Dijkstra result from " + str(source) + " to " + str(dest) + " is: " + str(A)
         B = []
+        adjacency_copy = defaultdict(lambda:defaultdict(lambda:(None,None)))#copy.deepcopy(adjacency)
 
         for k in range(1, K):
             for i in range(0, len(A[k-1])-1):
-                adjacency_copy = copy.deepcopy(adjacency)
+                adjacency_copy.clear()
+                for adj1 in adjacency:
+                    for adj2 in adjacency[adj1]:
+                        adjacency_copy[adj1][adj2] = adjacency[adj1][adj2]
                 spurNode = A[k-1][i] # Should retrieve i-th node
 
                 rootPath = A[k-1][:i+1]

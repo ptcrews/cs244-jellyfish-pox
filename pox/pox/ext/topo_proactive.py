@@ -144,7 +144,15 @@ def _get_paths (src, dst):
     if src == dst:
         return []
     else:
-        return paths.get_paths(path_map, list(switches_by_dpid), adjacency, src, dst)
+        log.debug("Switches: " + str(type(switches_by_dpid.values())))
+        log.debug("START DUMP")
+        for sws in switches_by_dpid.values():
+            log.debug("Single switch: " + str(type(sws))) 
+        for adj in adjacency:
+            for adj2 in adjacency[adj]:
+                log.debug("Adj: " + str(adj) + " " + str(adj2) + " " + str(adjacency[adj][adj2]))
+        log.debug("END DUMP")
+        return paths.get_paths(log, path_map, switches_by_dpid.values(), adjacency, src, dst)
 
 
 def ipinfo (ip):
@@ -218,9 +226,12 @@ class TopoSwitch (DHCPD):
 
     src = self
     for dst in switches_by_dpid.itervalues():
+      log.debug("DEST FOR SWITCH ITERVALUES: " + str(dst))
       if dst is src: continue
-      p = _get_paths(src, dst)[0]
-      if p is None: continue
+      paths = _get_paths(src, dst)
+      log.debug("Got path: " + str(paths) + " " + str(len(paths)))
+      p = paths[0]
+      if p is None or len(p) == 0: continue
 
       msg = of.ofp_flow_mod()
       msg.match = of.ofp_match()
@@ -450,6 +461,7 @@ class topo_addressing (object):
             # Yup, link goes both ways
             adjacency[sw1][sw2] = ll.port1
             adjacency[sw2][sw1] = ll.port2
+            log.debug("Added to adjacency: " + str(sw1) + " " + str(sw2) + " " + str(ll.port1))
             # Fixed -- new link chosen to connect these
             break
     else:
@@ -463,6 +475,7 @@ class topo_addressing (object):
           # Yup, link goes both ways -- connected!
           adjacency[sw1][sw2] = l.port1
           adjacency[sw2][sw1] = l.port2
+          log.debug("Added to adjacency: " + str(sw1) + " " + str(sw2) + " " + str(l.port1))
 
     for sw in switches_by_dpid.itervalues():
       sw.send_table()

@@ -37,11 +37,14 @@ class JellyFishTop(Topo):
 
 
         #Add all switches to the topology
+        counter = 0
         for y in range(self.num_switches):
             switchList.append(self.addSwitch('s%s' % (y)))
             for j in range(self.k-self.r):
-                hostList.append(self.addHost('s' + str(y) + 'h' + str(j), ip = '0.0.0.0'))
-                self.addLink(switchList[y], hostList[-1])
+                host = self.addHost('h' + str(counter), ip='0.0.0.0')
+                hostList.append(host)
+                self.addLink(switchList[y], hostList[-1], bw=10)
+                counter += 1
             for x in range(self.r):
                 portList.append(y)
 
@@ -71,7 +74,7 @@ class JellyFishTop(Topo):
                 portList.remove(randPort)
                 portList.remove(currentSwitch)
                 canConnect.remove(randPort)
-                self.addLink(switchList[currentSwitch], switchList[randPort])
+                self.addLink(switchList[currentSwitch], switchList[randPort], bw=10)
 
         for x in self.links():
             print x
@@ -98,6 +101,11 @@ def main():
     topo = JellyFishTop()
     net = Mininet(topo=topo, host=CPULimitedHost, link = TCLink, controller=JELLYPOX)
     net.start()
+    # NOTE: Must come after net.start
+    for host in net.hosts:
+        print str(host)
+        print str(host.defaultIntf().name)
+	host.cmdPrint('dhclient '+host.defaultIntf().name)
     CLI(net)
     net.stop()
     #paths = Paths(net)
@@ -129,7 +137,7 @@ def main():
     linksFile.write(str(net.links()))
     linksFile.close()
     '''
-    experiment(net)
+#    experiment(net)
 
 if __name__ == "__main__":
     main()
