@@ -67,6 +67,7 @@ class JellyFishTop(Topo):
                     randNum = 0
                 else:
                     randNum = random.randint(0, len(canConnect)-1)
+                    
 
                 print "randNum: " + str(randNum)
                 print "length of port list: " + str(len(portList))

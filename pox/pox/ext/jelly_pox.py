@@ -5,9 +5,10 @@ POXDIR = os.getcwd() + '/../..'
 
 class JELLYPOX( Controller ):
     def __init__( self, name, cdir=POXDIR,
-                  command='python pox.py', cargs=('log.level --DEBUG log --file=jelly.log,w openflow.of_01 --port=%s ext.jelly_controller' ),
+                  command='python pox.py', cargs=('log --file=pox/ext/jelly.log,w openflow.of_01 --port=%s ext.jelly_controller2' ),
                   **kwargs ):
-        Controller.__init__( self, name, cdir=cdir,
+        print "gonna init the controller"
+        print str(Controller.__init__( self, name, cdir=cdir,
                              command=command,
-                             cargs=cargs, **kwargs )
+                             cargs=cargs, **kwargs ))
 controllers={ 'jelly': JELLYPOX }

@@ -106,14 +106,21 @@ class l3_switch (EventMixin):
 
     # For each switch, we map IP addresses to Entries
     self.arpTable = {}
+    self.forwardingDict = {}
+
+    #TODO: Fill in forwarding Dict using routes saved to file
+    log.warning("Switch was created!")
+    print "hi Hudson you can print in this one wow!"
+    log.warning("Switch number is: " + self.defaultDpid())
 
     # This timer handles expiring stuff
-    self._expire_timer = Timer(5, self._handle_expiration, recurring=True)
+    #self._expire_timer = Timer(5, self._handle_expiration, recurring=True)
 
     self.listenTo(core)
 
   def _handle_expiration (self):
     # Called by a timer so that we can remove old items.
+    '''
     empty = []
     for k,v in self.lost_buffers.iteritems():
       dpid,ip = k
@@ -130,12 +137,14 @@ class l3_switch (EventMixin):
     # Remove empty buffer bins
     for k in empty:
       del self.lost_buffers[k]
+      ''' #No expiration here! - Hudson
 
   def _send_lost_buffers (self, dpid, ipaddr, macaddr, port):
     """
     We may have "lost" buffers -- packets we got but didn't know
     where to send at the time.  We may know now.  Try and see.
     """
+    '''
     if (dpid,ipaddr) in self.lost_buffers:
       # Yup!
       bucket = self.lost_buffers[(dpid,ipaddr)]
@@ -146,7 +155,8 @@ class l3_switch (EventMixin):
         po = of.ofp_packet_out(buffer_id=buffer_id,in_port=in_port)
         po.actions.append(of.ofp_action_dl_addr.set_dst(macaddr))
         po.actions.append(of.ofp_action_output(port = port))
-        core.openflow.sendToDPID(dpid, po)
+        core.openflow.sendToDPID(dpid, po)''' 
+        #Whole method commented out by Hudson
 
   def _handle_GoingUpEvent (self, event):
     self.listenTo(core.openflow)
@@ -159,14 +169,14 @@ class l3_switch (EventMixin):
     if not packet.parsed:
       log.warning("%i %i ignoring unparsed packet", dpid, inport)
       return
-
+    '''
     if dpid not in self.arpTable:
       # New switch -- create an empty table
       self.arpTable[dpid] = {}
       for fake in self.fakeways:
         self.arpTable[dpid][IPAddr(fake)] = Entry(of.OFPP_NONE,
          dpid_to_mac(dpid))
-
+    ''' #TODO: Replace with check for unknown addresses and throw error
     if packet.type == ethernet.LLDP_TYPE:
       # Ignore LLDP packets
       return
@@ -174,17 +184,19 @@ class l3_switch (EventMixin):
     if isinstance(packet.next, ipv4):
       log.debug("%i %i IP %s => %s", dpid,inport,
                 packet.next.srcip,packet.next.dstip)
+      log.warning("Received an IPv4 Packet good job!!")
 
       # Send any waiting packets...
-      self._send_lost_buffers(dpid, packet.next.srcip, packet.src, inport)
+      #self._send_lost_buffers(dpid, packet.next.srcip, packet.src, inport)
 
       # Learn or update port/MAC info
+      '''
       if packet.next.srcip in self.arpTable[dpid]:
         if self.arpTable[dpid][packet.next.srcip] != (inport, packet.src):
           log.info("%i %i RE-learned %s", dpid,inport,packet.next.srcip)
       else:
         log.debug("%i %i learned %s", dpid,inport,str(packet.next.srcip))
-      self.arpTable[dpid][packet.next.srcip] = Entry(inport, packet.src)
+      self.arpTable[dpid][packet.next.srcip] = Entry(inport, packet.src)'''
 
       # Try to forward
       dstaddr = packet.next.dstip
@@ -214,7 +226,7 @@ class l3_switch (EventMixin):
                                 match=of.ofp_match.from_packet(packet,
                                                                inport))
           event.connection.send(msg.pack())
-      elif self.arp_for_unknowns:
+      '''elif self.arp_for_unknowns:
         # We don't know this destination.
         # First, we track this buffer so that we can try to resend it later
         # if we learn the destination, second we ARP for the destination,
@@ -260,9 +272,9 @@ class l3_switch (EventMixin):
         msg.data = e.pack()
         msg.actions.append(of.ofp_action_output(port = of.OFPP_FLOOD))
         msg.in_port = inport
-        event.connection.send(msg)
+        event.connection.send(msg)'''
 
-    elif isinstance(packet.next, arp):
+    '''elif isinstance(packet.next, arp):
       a = packet.next
       log.debug("%i %i ARP %s %s => %s", dpid, inport,
        {arp.REQUEST:"request",arp.REPLY:"reply"}.get(a.opcode,
@@ -322,7 +334,9 @@ class l3_switch (EventMixin):
 
       msg = of.ofp_packet_out(in_port = inport, data = event.ofp,
           action = of.ofp_action_output(port = of.OFPP_FLOOD))
-      event.connection.send(msg)
+      event.connection.send(msg)'''
+  else:
+      log.debug("Received a packet that was not an ipv4 packet??")
 
 
 def launch (fakeways="", arp_for_unknowns=None):

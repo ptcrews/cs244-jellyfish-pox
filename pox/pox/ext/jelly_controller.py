@@ -17,7 +17,8 @@ Demonstrates the spanning tree module so that the L2 switch
 works decently on topologies with loops.
 """
 
-def launch ():
+def launch (forwarding = "l2"):
+  print "Hudson youre launching jelly_controller yay"
   import pox.log.color
   pox.log.color.launch()
   import pox.log
@@ -27,7 +28,7 @@ def launch ():
   import pox.openflow.discovery
   pox.openflow.discovery.launch()
 
-  core.getLogger("openflow.spanning_tree").setLevel("INFO")
+  log = core.getLogger()
   '''
   if forwarding.lower() == "l3":
     import pox.forwarding.l3_learning as fw
@@ -40,8 +41,9 @@ def launch ():
   '''
 
   #import pox.ext.l2_multi as fw
-  import pox.forwarding.l3_learning as fw
+  import pox.forwarding.l2_multi as fw
   core.getLogger().debug("Using forwarding: %s", fw.__name__)
+  print "Gonna launch the learning controller"
   fw.launch()
-  #import pox.openflow.spanning_tree
-  #pox.openflow.spanning_tree.launch()
+  import pox.openflow.spanning_tree
+  pox.openflow.spanning_tree.launch()
