@@ -144,7 +144,7 @@ def _get_paths (src, dst):
     if src == dst:
         return []
     else:
-        return paths.get_paths(switches_by_dpid, adjacency, src, dst)
+        return paths.get_paths(path_map, list(switches_by_dpid), adjacency, src, dst)
 
 
 def ipinfo (ip):
@@ -219,7 +219,7 @@ class TopoSwitch (DHCPD):
     src = self
     for dst in switches_by_dpid.itervalues():
       if dst is src: continue
-      p = _get_path(src, dst)
+      p = _get_paths(src, dst)[0]
       if p is None: continue
 
       msg = of.ofp_flow_mod()
@@ -482,7 +482,7 @@ class topo_addressing (object):
 
 
 
-def launch (topo, debug = False):
+def launch (debug = False):
   core.registerNew(topo_addressing)
   from proto.arp_helper import launch
   launch(eat_packets=False)

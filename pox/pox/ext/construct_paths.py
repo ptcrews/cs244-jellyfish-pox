@@ -9,6 +9,7 @@ K_VAL = 8
 KSP_MODE = 0
 ECMP8_MODE = 1
 ECMP64_MODE = 2
+MODE = KSP_MODE
 
 MODE = KSP_MODE
 class Paths ():
@@ -35,7 +36,7 @@ class Paths ():
                 self.adjacency[first_dpid][second_dpid] = 1
                 self.adjacency[second_dpid][first_dpid] = 1
 
-    def get_paths(switchlist, adjacency, src, dst):
+    def get_paths(self, path_map, switchlist, adjacency, src, dst):
         # Recomptues all paths if path_map is empty
         if len(path_map) == 0:
             self.compute_all_paths(path_map, switchlist, adjacency)

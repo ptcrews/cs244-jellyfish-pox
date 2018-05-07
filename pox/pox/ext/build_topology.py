@@ -97,6 +97,9 @@ def experiment(net):
 def main():
     topo = JellyFishTop()
     net = Mininet(topo=topo, host=CPULimitedHost, link = TCLink, controller=JELLYPOX)
+    net.start()
+    CLI(net)
+    net.stop()
     paths = Paths(net)
 #    paths.all_k_shortest_paths(paths.switches_by_dpid, 2)
     hosts_per_switch = 14 #23
@@ -126,6 +129,17 @@ def main():
             "running ecmp64"
             ecmp64_res = paths.count_distinct_paths(hosts_per_switch, 2, ksp_res[1])
             print "ECMP-64 Result: " + str(ecmp64_res[0])
+    '''
+    hosts_per_switch = 23
+    ksp_res = paths.count_distinct_paths(hosts_per_switch, 0, None)
+    ecmp8_res = paths.count_distinct_paths(hosts_per_switch, 1, ksp_res[1])
+    ecmp64_res = paths.count_distinct_paths(hosts_per_switch, 2, ksp_res[1])
+    print "KSP Result: " + str(ksp_res[0])
+    print "ECMP-8 Result: " + str(ecmp8_res[0])
+    print "ECMP-64 Result: " + str(ecmp64_res[0])
+
+    paths.plot_results(ksp_res[0], ecmp8_res[0], ecmp64_res[0])
+    '''
 
 #   net.interact()
     '''

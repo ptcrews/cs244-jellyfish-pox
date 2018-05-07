@@ -17,7 +17,7 @@ Demonstrates the spanning tree module so that the L2 switch
 works decently on topologies with loops.
 """
 
-def launch (forwarding = "l2"):
+def launch ():
   import pox.log.color
   pox.log.color.launch()
   import pox.log
@@ -43,5 +43,5 @@ def launch (forwarding = "l2"):
   import pox.ext.topo_proactive as fw
   core.getLogger().debug("Using forwarding: %s", fw.__name__)
   fw.launch()
-  import pox.openflow.spanning_tree
-  pox.openflow.spanning_tree.launch()
+  #import pox.openflow.spanning_tree
+  #pox.openflow.spanning_tree.launch()
