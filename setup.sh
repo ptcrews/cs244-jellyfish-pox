@@ -10,6 +10,7 @@ sudo apt-get purge iperf3
 sudo apt-get autoremove
 git clone https://github.com/esnet/iperf.git
 cd iperf
+./bootstrap.sh
 ./configure
 make
 sudo make install
