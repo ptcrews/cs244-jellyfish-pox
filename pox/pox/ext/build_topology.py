@@ -113,7 +113,7 @@ def main():
         print "KSP Result: " + str(ksp_res[0])
         print "ECMP-8 Result: " + str(ecmp8_res[0])
         print "ECMP-64 Result: " + str(ecmp64_res[0])
-        print: "About to produce Fig9 Reproduction: "
+        print "About to produce Fig9 Reproduction: "
         paths.plot_results(ksp_res[0], ecmp8_res[0], ecmp64_res[0])
         print "Plotting Figure 9 Complete"
     else:
