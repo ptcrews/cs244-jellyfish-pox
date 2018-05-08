@@ -381,14 +381,12 @@ class topo_addressing (object):
     # For link removals, this makes sure that we don't use a
     # path that may have been broken.
     #NOTE: This could be radically improved! (e.g., not *ALL* paths break)
-    clear = of.ofp_flow_mod(command=of.OFPFC_DELETE)
-    for sw in switches_by_dpid.itervalues():
-      if sw.connection is None: continue
-      sw.connection.send(clear)
-    path_map.clear()
+    log.debug("Should have invalidated everything here, but we're not")
 
     if event.removed:
+      log.debug("Link removed, but we ignore it")
       # This link no longer okay
+      '''
       if sw2 in adjacency[sw1]: del adjacency[sw1][sw2]
       if sw1 in adjacency[sw2]: del adjacency[sw2][sw1]
 
@@ -402,11 +400,18 @@ class topo_addressing (object):
             adjacency[sw2][sw1] = ll.port2
             # Fixed -- new link chosen to connect these
             break
+      '''
     else:
       # If we already consider these nodes connected, we can
       # ignore this link up.
       # Otherwise, we might be interested...
       if adjacency[sw1][sw2] is None:
+        clear = of.ofp_flow_mod(command=of.OFPFC_DELETE)
+        for sw in switches_by_dpid.itervalues():
+          if sw.connection is None: continue
+          sw.connection.send(clear)
+        path_map.clear()
+
         # These previously weren't connected.  If the link
         # exists in both directions, we consider them connected now.
         if flip(l) in core.openflow_discovery.adjacency:
@@ -415,11 +420,13 @@ class topo_addressing (object):
           adjacency[sw1][sw2] = l.port1
           adjacency[sw2][sw1] = l.port2
 
-    for sw in switches_by_dpid.itervalues():
-      sw.send_table()
+          for sw in switches_by_dpid.itervalues():
+            sw.send_table()
+
 
 
   def _handle_openflow_ConnectionUp (self, event):
+    log.debug("New switch!")
     sw = switches_by_dpid.get(event.dpid)
 
     if sw is None:

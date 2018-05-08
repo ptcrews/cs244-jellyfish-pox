@@ -2,8 +2,11 @@ import os
 import json
 
 def get_throughput_for_file(file):
-    json_file = json.load(file)
     throughput = 0
+    try:
+      json_file = json.load(file)
+    except ValueError, e:
+      return 0
     if "end" in json_file:
       if "sum_received" in json_file["end"]:
         if "bits_per_second" in json_file["end"]["sum_received"]:

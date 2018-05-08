@@ -89,9 +89,8 @@ def experiment(net):
 
 def test_timeout(net):
     print "Test timed out"
-    net.stop()
-    sleep(30)
-    sys.exit()
+    os.system('sudo mn -c')
+    os._exit(0)
 
 def main():
     if "N_FLOWS" in os.environ:
