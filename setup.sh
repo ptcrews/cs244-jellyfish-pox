@@ -15,6 +15,7 @@ git checkout 3.5
 ./configure
 make
 sudo make install
+sudo ldconfig
 cd ..
 
 
