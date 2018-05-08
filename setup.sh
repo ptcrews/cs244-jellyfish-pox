@@ -12,7 +12,7 @@ git clone https://github.com/esnet/iperf.git
 cd iperf
 ./configure
 make
-make install
+sudo make install
 cd ..
 
 
