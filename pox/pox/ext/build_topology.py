@@ -14,6 +14,7 @@ from subprocess import Popen
 from time import sleep, time
 import random
 from random import shuffle
+from threading import Timer
 
 from construct_paths import Paths
 
@@ -89,6 +90,12 @@ def experiment(net):
         net.pingAll()
         net.stop()
 
+def test_timeout(net):
+    print "Test timed out"
+    net.stop()
+    sleep(30)
+    sys.exit()
+
 def main():
     if "N_FLOWS" in os.environ:
         n_flows = int(os.environ["N_FLOWS"])
@@ -120,6 +127,9 @@ def main():
         host_list.append(host)
     shuffle(host_list)
 
+    t = Timer(120.0, test_timeout, [net])
+    t.start()
+
     for i in range(len(host_list)/2):
         host1 = host_list[i]
         host2 = host_list[len(host_list)/2 + i]
@@ -127,9 +137,9 @@ def main():
         outfile = dirname + "/" + str(test_num) + "_" + str(host1.name) + "_" + str(host2.name)
         host1.cmd('iperf3 -s -p 4500 &')
         if n_flows == 1:
-            host2.sendCmd('iperf3 -t 30 -p 4500 -c '+ ip_dict[host1.name] + ' -J > ' + outfile)
+            host2.sendCmd('iperf3 -p 4500 -c '+ ip_dict[host1.name] + ' -J > ' + outfile)
         else:
-            host2.sendCmd('iperf3 -t 30 -p 4500 -P 8 -c '+ ip_dict[host1.name] + ' --cport 5000 -J > ' + outfile)
+            host2.sendCmd('iperf3 -p 4500 -P 8 -c '+ ip_dict[host1.name] + ' --cport 5000 -J > ' + outfile)
     results = {}
     for i in range(len(host_list)/2):
         host = host_list[len(host_list)/2 + i]

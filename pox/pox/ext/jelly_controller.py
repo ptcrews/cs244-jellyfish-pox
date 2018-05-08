@@ -25,7 +25,10 @@ def launch ():
                         "@@@bold%(message)s@@@normal")
   from pox.core import core
   import pox.openflow.discovery
-  pox.openflow.discovery.launch()
+  pox.openflow.discovery.launch(link_timeout='20')
+  
+  import pox.openflow.keepalive
+  pox.openflow.keepalive.launch(interval='10000', timeout='10000')
 
   core.getLogger("openflow.spanning_tree").setLevel("INFO")
 
