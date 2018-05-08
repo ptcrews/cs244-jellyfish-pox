@@ -214,12 +214,13 @@ class Paths ():
                 print "FAILURE"'''
 
         print "Number of paths found before pruning: " + str(len(ksp))
+        return_paths=[]
 
         for path in ksp:
-            if len(path) > shortest_path_length:
-                ksp.remove(path)
+            if len(path) == shortest_path_length:
+                return_paths.append(path)
 
-        print "Paths remaining after pruning" + str(len(ksp))
+        print "Paths remaining after pruning" + str(len(return_paths))
 
         '''        for path in ksp8:
             if len(path) > len(ksp8[0]):
@@ -230,7 +231,7 @@ class Paths ():
         if(len(ksp8) > len(ksp64)):
             print "ERROR NUMBER 2"
             exit()'''
-        return ksp
+        return return_paths
 
     def simple_test (self):
         switches = [0, 1, 2, 3, 4, 5, 6, 7]
