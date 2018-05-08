@@ -25,23 +25,10 @@ def launch ():
                         "@@@bold%(message)s@@@normal")
   from pox.core import core
   import pox.openflow.discovery
-  pox.openflow.discovery.launch(link_timeout='20')
+  pox.openflow.discovery.launch()
 
   core.getLogger("openflow.spanning_tree").setLevel("INFO")
-  '''
-  if forwarding.lower() == "l3":
-    import pox.forwarding.l3_learning as fw
-  elif forwarding.lower() == "l2_multi":
-    import pox.forwarding.l2_multi as fw
-  else:
-    import pox.forwarding.l2_learning as fw
-  core.getLogger().debug("Using forwarding: %s", fw.__name__)
-  fw.launch()
-  '''
 
-  #import pox.ext.l2_multi as fw
   import pox.ext.topo_proactive as fw
   core.getLogger().debug("Using forwarding: %s", fw.__name__)
   fw.launch()
-  #import pox.openflow.spanning_tree
-  #pox.openflow.spanning_tree.launch()

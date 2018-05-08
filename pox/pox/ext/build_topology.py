@@ -109,12 +109,12 @@ def main():
     net = Mininet(topo=topo, host=CPULimitedHost, link = TCLink, controller=JELLYPOX)
     net.start()
     # NOTE: Must come after net.start
-    sleep(120)
+    sleep(30)
     for host in net.hosts:
         print str(host)
         print str(host.defaultIntf().name)
 	host.cmdPrint('dhclient '+host.defaultIntf().name)
-    sleep(120)
+    sleep(60)
     host_list = []
     for host in net.hosts:
         host_list.append(host)

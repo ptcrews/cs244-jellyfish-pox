@@ -60,7 +60,6 @@ class Paths ():
     # switches = list of switch ids (e.g. switches_by_dpid.values())
     def dijkstra (self, switches, adjacency, source, dest):
         # List of all the switches by dpid
-        # TODO: Should probably be a set...
         Q = []
         for sws in switches:
             Q.append(sws)
