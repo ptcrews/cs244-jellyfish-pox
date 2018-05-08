@@ -127,7 +127,7 @@ def main():
         host_list.append(host)
     shuffle(host_list)
 
-    t = Timer(120.0, test_timeout, [net])
+    t = Timer(600.0, test_timeout, [net])
     t.start()
 
     for i in range(len(host_list)/2):

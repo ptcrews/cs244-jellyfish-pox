@@ -157,6 +157,7 @@ class TopoSwitch (DHCPD):
 
       log.debug("Found a path: " + str(p))
       msg = of.ofp_flow_mod()
+      msg.priority = 0x9000
       msg.match = of.ofp_match()
       msg.match.dl_type = pkt.ethernet.IP_TYPE
       #msg.match.nw_dst = "%s/%s" % (dst.network, dst.subnet)
