@@ -1,3 +1,4 @@
+import os
 from collections import defaultdict
 import matplotlib.pyplot as plt
 import random
@@ -38,9 +39,11 @@ class Paths ():
                 self.adjacency[second_dpid][first_dpid] = 1
 
     def compute_paths(self, switchlist, adjacency, log):
-        log.debug("First")
+        if "TEST_NAME" in os.environ:
+            if os.environ["TEST_NAME"] == "KSP": MODE = KSP_MODE
+            elif os.environ["TEST_NAME"] == "ECMP": MODE = ECMP8_MODE
+
         self.path_map.clear()
-        log.debug("Second")
         self.compute_all_paths(self.path_map, switchlist, adjacency, log)
 
     def get_paths(self, log, path_map, switchlist, adjacency, src, dst):
@@ -187,7 +190,6 @@ class Paths ():
 
     def compute_all_paths (self, path_map, switches, adjacency, log):
         path_map.clear()
-        log.debug("Here")
         for i in switches:
             for j in switches:
                 if MODE == KSP_MODE:
@@ -200,50 +202,11 @@ class Paths ():
 
     def ecmp (self, switches, adjacency, src, dst, K):
         ksp = self.yen_ksp(switches, adjacency, src, dst, K)
-        '''ksp8 = self.yen_ksp(switches, adjacency, src, dst, 8)
-        print "KSP8 is: " + str(ksp8)
-        ksp64 = self.yen_ksp(switches, adjacency, src, dst, 64)
-        quit = 0
-        if len(ksp64) < len(ksp8):
-            print "ERROR!! KSP8 found more paths"
-            quit = 1
-        for path in ksp8:
-            path_in_ksp64 = 0
-            for path64 in ksp64:
-                if path64 == path:
-                    print "match"
-                    path_in_ksp64 = 1
-                    break
-            print "hi"
-            if path_in_ksp64 == 0:
-                print "ERROR: path: " + str(path) + " is in ksp8 but not ksp64"
-                exit()
-        print "KSP64 is: " + str(ksp64)
-        print "ksp before sort: " + str(ksp)'''
         ksp.sort(key=len)
-        '''        ksp64.sort(key=len)
-        ksp8.sort(key=len)
-        print "ksp after sort: " + str(ksp)'''
         shortest_path_length = len(ksp[0])
-        '''        print "shortest length path ksp8 is: " + str(len(ksp8[0]))
-        print "shortest length path ksp64 is: " + str(len(ksp64[0]))
-        if quit == 1:
-            exit()
-            while(1):
-                print "FAILURE"'''
         for path in ksp:
             if len(path) > shortest_path_length:
                 ksp.remove(path)
-
-        '''        for path in ksp8:
-            if len(path) > len(ksp8[0]):
-                ksp8.remove(path)
-        for path in ksp64:
-            if len(path) > len(ksp64[0]):
-                ksp64.remove(path)
-        if(len(ksp8) > len(ksp64)):
-            print "ERROR NUMBER 2"
-            exit()'''
         return ksp
 
     def simple_test (self):

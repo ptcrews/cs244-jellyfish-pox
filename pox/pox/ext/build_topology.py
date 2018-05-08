@@ -23,7 +23,7 @@ class JellyFishTop(Topo):
 
     k = 15#Ports per switch #24
     r = 5#Ports dedicated to connecting to other ToR switches #10
-    num_switches = 25#49
+    num_switches = 20#49
 
     def portListContainsOther(self, port, portList):
         for x in portList:
@@ -73,8 +73,6 @@ class JellyFishTop(Topo):
                 else:
                     randNum = random.randint(0, len(canConnect)-1)
 
-                print "randNum: " + str(randNum)
-                print "length of port list: " + str(len(portList))
                 randPort = canConnect[randNum]
 
                 portList.remove(randPort)
@@ -92,6 +90,21 @@ def experiment(net):
         net.stop()
 
 def main():
+    if "N_FLOWS" in os.environ:
+        n_flows = int(os.environ["N_FLOWS"])
+    else:
+        n_flows = 1
+    
+    if "TEST_NAME" in os.environ:
+        test_name = os.environ["TEST_NAME"]
+    else:
+        test_name = "KSP"
+
+    if "TEST_NUM" in os.environ:
+        test_num = int(os.environ["TEST_NUM"])
+    else:
+        test_num = 0
+
     topo = JellyFishTop()
     net = Mininet(topo=topo, host=CPULimitedHost, link = TCLink, controller=JELLYPOX)
     net.start()
@@ -101,47 +114,30 @@ def main():
         print str(host)
         print str(host.defaultIntf().name)
 	host.cmdPrint('dhclient '+host.defaultIntf().name)
-    #sleep(10800)
     sleep(400)
     host_list = []
     for host in net.hosts:
         host_list.append(host)
     shuffle(host_list)
-    '''
+
     for i in range(len(host_list)/2):
         host1 = host_list[i]
         host2 = host_list[len(host_list)/2 + i]
-        print ("Evaluating performance single: " + str(ip_dict[host1.name]))
+        dirname = "test_" + test_name + "_" + str(n_flows)
+        outfile = dirname + "/" + str(test_num) + "_" + str(host1.name) + "_" + str(host2.name)
         host1.cmd('iperf3 -s -p 4500 &')
-        host2.sendCmd('iperf3 -t 30 -p 4500 -c '+ ip_dict[host1.name] + ' -J > ' + str(host1.name)+'_'+str(host2.name))
+        if n_flows == 1:
+            host2.sendCmd('iperf3 -t 30 -p 4500 -c '+ ip_dict[host1.name] + ' -J > ' + outfile)
+        else:
+            host2.sendCmd('iperf3 -t 30 -p 4500 -P 8 -c '+ ip_dict[host1.name] + ' --cport 5000 -J > ' + outfile)
     results = {}
     for i in range(len(host_list)/2):
         host = host_list[len(host_list)/2 + i]
         results[host.name] = host.waitOutput()
         print str(results[host.name])
     
-    sleep(30)
-    '''
-    results_8 = {}
-    for i in range(len(host_list)/2):
-        host1 = host_list[i]
-        host2 = host_list[len(host_list)/2 + i]
-        print ("Evaluating performance 8 flows: " + str(ip_dict[host1.name]))
-        host1.cmd('iperf3 -s -p 4500 &')
-        host2.sendCmd('iperf3 -t 30 -p 4500 -P 8 -c '+ ip_dict[host1.name] + ' --cport 5000 -J > ' + str(host1.name) + '_' + str(host2.name) + "_8way")
-    for i in range(len(host_list)/2):
-        host = host_list[len(host_list)/2 + i]
-        results_8[host.name] = host.waitOutput()
-        print str(results_8[host.name])
-    
-    print ("End evaluation")
-
     CLI(net)
     net.stop()
-    #paths = Paths(net)
-#    paths.all_k_shortest_paths(paths.switches_by_dpid, 2)
-#   net.interact()
-#    experiment(net)
 
 if __name__ == "__main__":
     main()
