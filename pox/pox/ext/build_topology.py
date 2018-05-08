@@ -108,8 +108,8 @@ def main():
 
         ksp_res = paths.count_distinct_paths(hosts_per_switch, 0, None)
         ecmp8_res = paths.count_distinct_paths(hosts_per_switch, 1, ksp_res[1])
-        #ecmp64_res = paths.count_distinct_paths(hosts_per_switch, 2, ksp_res[1])
-        ecmp64_res = ecmp8_res
+        ecmp64_res = paths.count_distinct_paths(hosts_per_switch, 2, ksp_res[1])
+        #ecmp64_res = ecmp8_res
         print "KSP Result: " + str(ksp_res[0])
         kspfile = open("ksp8_res.txt", "w+")
         kspfile.write(str(ksp_res[0]))
