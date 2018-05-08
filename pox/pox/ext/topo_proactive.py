@@ -437,6 +437,6 @@ def launch (debug = False):
   from proto.arp_helper import launch
   launch(eat_packets=False)
   # Normally 360
-  core.callDelayed(420, compute_paths)
+  core.callDelayed(180, compute_paths)
   if not debug:
     core.getLogger("proto.arp_helper").setLevel(99)

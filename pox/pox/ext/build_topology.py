@@ -114,7 +114,7 @@ def main():
         print str(host)
         print str(host.defaultIntf().name)
 	host.cmdPrint('dhclient '+host.defaultIntf().name)
-    sleep(400)
+    sleep(120)
     host_list = []
     for host in net.hosts:
         host_list.append(host)
@@ -136,7 +136,7 @@ def main():
         results[host.name] = host.waitOutput()
         print str(results[host.name])
     
-    CLI(net)
+    #CLI(net)
     net.stop()
 
 if __name__ == "__main__":
