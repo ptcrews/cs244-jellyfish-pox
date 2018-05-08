@@ -13,15 +13,17 @@ from pox.ext.jelly_pox import JELLYPOX
 from subprocess import Popen
 from time import sleep, time
 import random
+from random import shuffle
 
 from construct_paths import Paths
 
-class JellyFishTop(Topo):
-    ''' TODO, build your topology here'''
+ip_dict = {}
 
-    k = 5#Ports per switch #24
-    r = 3#Ports dedicated to connecting to other ToR switches #10
-    num_switches = 5#49
+class JellyFishTop(Topo):
+
+    k = 15#Ports per switch #24
+    r = 5#Ports dedicated to connecting to other ToR switches #10
+    num_switches = 25#49
 
     def portListContainsOther(self, port, portList):
         for x in portList:
@@ -41,7 +43,11 @@ class JellyFishTop(Topo):
         for y in range(self.num_switches):
             switchList.append(self.addSwitch('s%s' % (y)))
             for j in range(self.k-self.r):
-                host = self.addHost('h' + str(counter), ip='0.0.0.0')
+                host_name = 'h' + str(counter)
+                switch_num_str = str(y)
+                if y == 0: switch_num_str = "100"
+                ip_dict[host_name] = "10." + switch_num_str + "." + str(j+1) + ".1"
+                host = self.addHost(host_name, ip='0.0.0.0')
                 hostList.append(host)
                 self.addLink(switchList[y], hostList[-1], bw=10)
                 counter += 1
@@ -74,22 +80,10 @@ class JellyFishTop(Topo):
                 portList.remove(randPort)
                 portList.remove(currentSwitch)
                 canConnect.remove(randPort)
-                self.addLink(switchList[currentSwitch], switchList[randPort], bw=10)
+                self.addLink(switchList[currentSwitch], switchList[randPort], bw=100)
 
         for x in self.links():
             print x
-
-
-        #leftHost = self.addHost( 'h1' )
-        #rightHost = self.addHost( 'h2' )
-        #leftSwitch = self.addSwitch( 's3' )
-        #rightSwitch = self.addSwitch( 's4' )
-
-        # Add links
-        #self.addLink( leftHost, leftSwitch )
-        #self.addLink( leftSwitch, rightSwitch )
-        #self.addLink( rightSwitch, rightHost )
-
 
 def experiment(net):
         net.start()
@@ -102,41 +96,51 @@ def main():
     net = Mininet(topo=topo, host=CPULimitedHost, link = TCLink, controller=JELLYPOX)
     net.start()
     # NOTE: Must come after net.start
+    sleep(120)
     for host in net.hosts:
         print str(host)
         print str(host.defaultIntf().name)
 	host.cmdPrint('dhclient '+host.defaultIntf().name)
+    #sleep(10800)
+    sleep(400)
+    host_list = []
+    for host in net.hosts:
+        host_list.append(host)
+    shuffle(host_list)
+    '''
+    for i in range(len(host_list)/2):
+        host1 = host_list[i]
+        host2 = host_list[len(host_list)/2 + i]
+        print ("Evaluating performance single: " + str(ip_dict[host1.name]))
+        host1.cmd('iperf3 -s -p 4500 &')
+        host2.sendCmd('iperf3 -t 30 -p 4500 -c '+ ip_dict[host1.name] + ' -J > ' + str(host1.name)+'_'+str(host2.name))
+    results = {}
+    for i in range(len(host_list)/2):
+        host = host_list[len(host_list)/2 + i]
+        results[host.name] = host.waitOutput()
+        print str(results[host.name])
+    
+    sleep(30)
+    '''
+    results_8 = {}
+    for i in range(len(host_list)/2):
+        host1 = host_list[i]
+        host2 = host_list[len(host_list)/2 + i]
+        print ("Evaluating performance 8 flows: " + str(ip_dict[host1.name]))
+        host1.cmd('iperf3 -s -p 4500 &')
+        host2.sendCmd('iperf3 -t 30 -p 4500 -P 8 -c '+ ip_dict[host1.name] + ' --cport 5000 -J > ' + str(host1.name) + '_' + str(host2.name) + "_8way")
+    for i in range(len(host_list)/2):
+        host = host_list[len(host_list)/2 + i]
+        results_8[host.name] = host.waitOutput()
+        print str(results_8[host.name])
+    
+    print ("End evaluation")
+
     CLI(net)
     net.stop()
     #paths = Paths(net)
 #    paths.all_k_shortest_paths(paths.switches_by_dpid, 2)
-    '''
-    hosts_per_switch = 23
-    ksp_res = paths.count_distinct_paths(hosts_per_switch, 0, None)
-    ecmp8_res = paths.count_distinct_paths(hosts_per_switch, 1, ksp_res[1])
-    ecmp64_res = paths.count_distinct_paths(hosts_per_switch, 2, ksp_res[1])
-    print "KSP Result: " + str(ksp_res[0])
-    print "ECMP-8 Result: " + str(ecmp8_res[0])
-    print "ECMP-64 Result: " + str(ecmp64_res[0])
-
-    paths.plot_results(ksp_res[0], ecmp8_res[0], ecmp64_res[0])
-    '''
-
 #   net.interact()
-    '''
-    Now code to genereate the hosts and links for us in the topo visualizer
-    dumpFilename = "dump.txt"
-    dumpFile = open(dumpFilename, "w+")
-    #for node in self.values():
-    #    dumpFile.write( '%s\n' % repr( node ) )
-    dumpFile.write(str(net.do_dump()))
-    dumpFile.close()
-
-    linksFilename = "links.txt"
-    linksFile = open(linksFilename, "w+")
-    linksFile.write(str(net.links()))
-    linksFile.close()
-    '''
 #    experiment(net)
 
 if __name__ == "__main__":

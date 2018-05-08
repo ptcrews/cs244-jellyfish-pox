@@ -47,7 +47,10 @@ class Paths ():
         # Recomptues all paths if path_map is empty
         #if len(path_map) == 0:
 	#self.compute_all_paths(path_map, switchlist, adjacency)
-        return self.path_map[src][dst]
+        found_paths = self.path_map[src][dst]
+        if found_paths == (None, None):
+            return [[]]
+        return found_paths
 
 
     # Simple source - to - dest Dijkstra implementation

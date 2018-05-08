@@ -61,10 +61,14 @@ def dpid_to_mac (dpid):
 
 def compute_paths():
     log.debug("Timer fired: COMPUTING PATHS")
-    log.debug("Len: " + str(len(switches_by_dpid.values())))
+    log.debug("Vals: " + str(switches_by_dpid.values()))
+    for adj1 in adjacency:
+        for adj2 in adjacency[adj1]:
+            log.debug("Adjacency: " + str(adj1) + " " + str(adj2) + " "  + str(adjacency[adj1][adj2]))
     paths.compute_paths(switches_by_dpid.values(), adjacency, log)
     log.debug("Timer fired: END COMPUTING PATHS")
     for sw in switches_by_dpid.itervalues():
+      log.debug("In table sending")
       sw.send_table()
     log.debug("After table sending")
 
@@ -151,6 +155,7 @@ class TopoSwitch (DHCPD):
       p = paths[0]
       if p is None or len(p) == 0: continue
 
+      log.debug("Found a path: " + str(p))
       msg = of.ofp_flow_mod()
       msg.match = of.ofp_match()
       msg.match.dl_type = pkt.ethernet.IP_TYPE
@@ -159,6 +164,20 @@ class TopoSwitch (DHCPD):
 
       msg.actions.append(of.ofp_action_output(port=p[0][1]))
       self.connection.send(msg)
+
+      counter = 0
+      for p in paths[1:]:
+        msg = of.ofp_flow_mod()
+        msg.match = of.ofp_match()
+        msg.match.dl_type = pkt.ethernet.IP_TYPE
+        msg.match.nw_proto = pkt.ipv4.TCP_PROTOCOL
+        msg.match.tp_src = 5000 + counter
+        #msg.match.nw_dst = "%s/%s" % (dst.network, dst.subnet)
+        msg.match.nw_dst = "%s/%s" % (dst.network, "255.255.0.0")
+
+        msg.actions.append(of.ofp_action_output(port=p[0][1]))
+        self.connection.send(msg)
+        counter += 1
 
     """
     # Can just do this instead of MAC learning if you run arp_responder...
@@ -377,6 +396,7 @@ class topo_addressing (object):
         if ll.dpid1 == l.dpid1 and ll.dpid2 == l.dpid2:
           if flip(ll) in core.openflow_discovery.adjacency:
             # Yup, link goes both ways
+            log.debug("Adjacency: " + str(sw1) + " " + str(sw2))
             adjacency[sw1][sw2] = ll.port1
             adjacency[sw2][sw1] = ll.port2
             # Fixed -- new link chosen to connect these
@@ -390,6 +410,7 @@ class topo_addressing (object):
         # exists in both directions, we consider them connected now.
         if flip(l) in core.openflow_discovery.adjacency:
           # Yup, link goes both ways -- connected!
+          log.debug("Adjacency: " + str(sw1) + " " + str(sw2))
           adjacency[sw1][sw2] = l.port1
           adjacency[sw2][sw1] = l.port2
 
@@ -416,6 +437,6 @@ def launch (debug = False):
   from proto.arp_helper import launch
   launch(eat_packets=False)
   # Normally 360
-  core.callDelayed(60, compute_paths)
+  core.callDelayed(420, compute_paths)
   if not debug:
     core.getLogger("proto.arp_helper").setLevel(99)
