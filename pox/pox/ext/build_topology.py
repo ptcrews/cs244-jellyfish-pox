@@ -111,11 +111,21 @@ def main():
         #ecmp64_res = paths.count_distinct_paths(hosts_per_switch, 2, ksp_res[1])
         ecmp64_res = ecmp8_res
         print "KSP Result: " + str(ksp_res[0])
+        kspfile = open("ksp8_res.txt", "w+")
+        kspfile.write(str(ksp_res[0]))
+        kspfile.close
         print "ECMP-8 Result: " + str(ecmp8_res[0])
+        ecmp8file = open("ecmp8_res.txt", "w+")
+        ecmp8file.write(str(ecmp8_res[0]))
+        ecmp8file.close()
         print "ECMP-64 Result: " + str(ecmp64_res[0])
-        print "About to produce Fig9 Reproduction: "
-        paths.plot_results(ksp_res[0], ecmp8_res[0], ecmp64_res[0])
-        print "Plotting Figure 9 Complete"
+        ecmp64file = open("ecmp64_res.txt", "w+")
+        ecmp64file.write(str(ecmp64_res[0]))
+        ecmp64file.close()
+        print "All files written"
+        #print "About to produce Fig9 Reproduction: "
+        #paths.plot_results(ksp_res[0], ecmp8_res[0], ecmp64_res[0])
+        #print "Plotting Figure 9 Complete"
     else:
         if sys.argv[1] == '0': #KSP
             print "running KSP"
