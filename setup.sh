@@ -8,6 +8,7 @@ pip install matplotlib
 sudo apt-get remove iperf3
 sudo apt-get purge iperf3
 sudo apt-get autoremove
+cd ..
 git clone https://github.com/esnet/iperf.git
 cd iperf
 git checkout 3.5
@@ -16,7 +17,7 @@ git checkout 3.5
 make
 sudo make install
 sudo ldconfig
-cd ..
+cd ../cs244-jellyfish-pox
 
 
 
