@@ -22,10 +22,10 @@ def compute_average_for_test(test_type):
 
 def compute_average_all_tests():
     results = {}
-    #results['KSP Throughput: '] = compute_average_for_test("KSP")
+    results['KSP Throughput: '] = compute_average_for_test("KSP_1")
     results['KSP 8-Flow Throughput: '] = compute_average_for_test("KSP_8")
-    #results['ECMP Throughput: '] = compute_average_for_test("ECMP")
-    #results['ECMP 8-Flow Throughput'] = compute_average_for_test("ECMP_8")
+    results['ECMP Throughput: '] = compute_average_for_test("ECMP_1")
+    results['ECMP 8-Flow Throughput'] = compute_average_for_test("ECMP_8")
     return results
 
 if __name__ == "__main__":

@@ -22,7 +22,7 @@ ip_dict = {}
 
 class JellyFishTop(Topo):
 
-    k = 10#Ports per switch #24
+    k = 15#Ports per switch #24
     r = 5#Ports dedicated to connecting to other ToR switches #10
     num_switches = 20#49
 
@@ -147,9 +147,8 @@ def main():
     print "Tests completed"
     
     #CLI(net)
-    net.stop()
-    sleep(30)
-    sys.exit()
+    os.system('sudo mn -c')
+    os._exit(0)
 
 if __name__ == "__main__":
     main()
