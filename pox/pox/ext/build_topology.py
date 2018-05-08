@@ -19,9 +19,9 @@ from construct_paths import Paths
 class JellyFishTop(Topo):
     ''' TODO, build your topology here'''
 
-    k = 24 #Ports per switch #24 #36
-    r = 10 #Ports dedicated to connecting to other ToR switches #10 #13
-    num_switches = 49 #49 #212
+    k = 18 #Ports per switch #24 #36
+    r = 11 #Ports dedicated to connecting to other ToR switches #10 #13
+    num_switches = 98 #49 #212
 
     def portListContainsOther(self, port, portList):
         for x in portList:
@@ -102,7 +102,7 @@ def main():
 #    net.stop()
     paths = Paths(net)
 #    paths.all_k_shortest_paths(paths.switches_by_dpid, 2)
-    hosts_per_switch = 14 #23
+    hosts_per_switch = 7 #23
     if len(sys.argv) == 1: #No command line args
         print "No command line args"
 
