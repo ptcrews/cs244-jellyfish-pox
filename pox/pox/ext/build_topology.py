@@ -114,6 +114,7 @@ def main():
         print "ECMP-64 Result: " + str(ecmp64_res[0])
 
         paths.plot_results(ksp_res[0], ecmp8_res[0], ecmp64_res[0])
+        print "Plotting Figure 9 Complete"
     else:
         if sys.argv[1] == '0': #KSP
             print "running KSP"
