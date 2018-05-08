@@ -3,7 +3,11 @@ import json
 
 def get_throughput_for_file(file):
     json_file = json.load(file)
-    throughput = json_file["end"]["sum_received"]["bits_per_second"]
+    throughput = 0
+    if "end" in json_file:
+      if "sum_received" in json_file["end"]:
+        if "bits_per_second" in json_file["end"]["sum_received"]:
+          throughput = json_file["end"]["sum_received"]["bits_per_second"]
     return throughput
 
 def compute_average_for_test(test_type):
@@ -18,10 +22,10 @@ def compute_average_for_test(test_type):
 
 def compute_average_all_tests():
     results = {}
-    results['ksp'] = compute_average_for_test("KSP")
-    results['ksp_8'] = compute_average_for_test("KSP_8")
-    results['ecmp'] = compute_average_for_test("ECMP")
-    results['ecmp_8'] = compute_average_for_test("ECMP_8")
+    #results['KSP Throughput: '] = compute_average_for_test("KSP")
+    results['KSP 8-Flow Throughput: '] = compute_average_for_test("KSP_8")
+    #results['ECMP Throughput: '] = compute_average_for_test("ECMP")
+    #results['ECMP 8-Flow Throughput'] = compute_average_for_test("ECMP_8")
     return results
 
 if __name__ == "__main__":

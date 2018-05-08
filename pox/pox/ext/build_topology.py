@@ -22,7 +22,7 @@ ip_dict = {}
 
 class JellyFishTop(Topo):
 
-    k = 15#Ports per switch #24
+    k = 10#Ports per switch #24
     r = 5#Ports dedicated to connecting to other ToR switches #10
     num_switches = 20#49
 
@@ -81,9 +81,6 @@ class JellyFishTop(Topo):
                 canConnect.remove(randPort)
                 self.addLink(switchList[currentSwitch], switchList[randPort], bw=100)
 
-        for x in self.links():
-            print x
-
 def experiment(net):
         net.start()
         sleep(20)
@@ -127,9 +124,7 @@ def main():
         host_list.append(host)
     shuffle(host_list)
 
-    t = Timer(600.0, test_timeout, [net])
-    t.start()
-
+    print "Tests starting"
     for i in range(len(host_list)/2):
         host1 = host_list[i]
         host2 = host_list[len(host_list)/2 + i]
@@ -140,14 +135,21 @@ def main():
             host2.sendCmd('iperf3 -p 4500 -c '+ ip_dict[host1.name] + ' -J > ' + outfile)
         else:
             host2.sendCmd('iperf3 -p 4500 -P 8 -c '+ ip_dict[host1.name] + ' --cport 5000 -J > ' + outfile)
+
+    t = Timer(600.0, test_timeout, [net])
+    t.start()
+
     results = {}
     for i in range(len(host_list)/2):
         host = host_list[len(host_list)/2 + i]
         results[host.name] = host.waitOutput()
         print str(results[host.name])
+    print "Tests completed"
     
     #CLI(net)
     net.stop()
+    sleep(30)
+    sys.exit()
 
 if __name__ == "__main__":
     main()
