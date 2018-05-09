@@ -11,9 +11,11 @@ mkdir test_ECMP_1
 mkdir test_ECMP_8
 
 # Set up test-specific variables
-export N_PORTS=25
+export N_PORTS=15
 export INTER_PORTS=5
-export NUM_SW=40
+export NUM_SW=30
+export SWITCH_BW=100
+export HOST_BW=10
 
 for ((i=0;i<5;i++))
 do

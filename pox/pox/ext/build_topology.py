@@ -39,6 +39,16 @@ class JellyFishTop(Topo):
     else:
         num_switches = 20
 
+    if "SWITCH_BW" in os.environ:
+        switch_bandwidth = int(os.environ["SWITCH_BW"])
+    else:
+        switch_bandwidth = 10
+
+    if "HOST_BW" in os.environ:
+        host_bandwidth = int(os.environ["HOST_BW"])
+    else:
+        host_bandwidth = 1
+
     def portListContainsOther(self, port, portList):
         for x in portList:
             if x != port:
@@ -50,6 +60,8 @@ class JellyFishTop(Topo):
         print "\tn_ports: " + str(self.k)
         print "\tInter switch connections: " + str(self.r)
         print "\tNum switches: " + str(self.num_switches)
+        print "\tSwitch bandwidth: " + str(self.switch_bandwidth)
+        print "\tHost bandwidth: " + str(self.host_bandwidth)
 
         hostList = []
         switchList = []
@@ -67,7 +79,7 @@ class JellyFishTop(Topo):
                 ip_dict[host_name] = "10." + switch_num_str + "." + str(j+1) + ".1"
                 host = self.addHost(host_name, ip='0.0.0.0')
                 hostList.append(host)
-                self.addLink(switchList[y], hostList[-1], bw=1)
+                self.addLink(switchList[y], hostList[-1], bw=self.host_bandwidth)
                 counter += 1
             for x in range(self.r):
                 portList.append(y)
@@ -96,7 +108,7 @@ class JellyFishTop(Topo):
                 portList.remove(randPort)
                 portList.remove(currentSwitch)
                 canConnect.remove(randPort)
-                self.addLink(switchList[currentSwitch], switchList[randPort], bw=10)
+                self.addLink(switchList[currentSwitch], switchList[randPort], bw=self.switch_bandwidth)
 
 def experiment(net):
         net.start()
