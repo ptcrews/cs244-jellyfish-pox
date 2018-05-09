@@ -21,10 +21,23 @@ from construct_paths import Paths
 ip_dict = {}
 
 class JellyFishTop(Topo):
+    #Ports per switch #24
+    if "N_PORTS" in os.environ:
+        k = int(os.environ["N_PORTS"])
+    else:
+        k = 15
 
-    k = 15#Ports per switch #24
-    r = 5#Ports dedicated to connecting to other ToR switches #10
-    num_switches = 20#49
+    #Ports dedicated to connecting to other ToR switches #10
+    if "INTER_PORTS" in os.environ:
+        r = int(os.environ["INTER_PORTS"])
+    else:
+        r = 5
+
+    #49
+    if "NUM_SW" in os.environ:
+        num_switches = int(os.environ["NUM_SW"])
+    else:
+        num_switches = 20
 
     def portListContainsOther(self, port, portList):
         for x in portList:
@@ -33,6 +46,10 @@ class JellyFishTop(Topo):
         return False
 
     def build(self):
+        print "Building topology:"
+        print "\tn_ports: " + str(self.k)
+        print "\tInter switch connections: " + str(self.r)
+        print "\tNum switches: " + str(self.num_switches)
 
         hostList = []
         switchList = []
