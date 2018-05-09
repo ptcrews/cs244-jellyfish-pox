@@ -50,7 +50,7 @@ class JellyFishTop(Topo):
                 ip_dict[host_name] = "10." + switch_num_str + "." + str(j+1) + ".1"
                 host = self.addHost(host_name, ip='0.0.0.0')
                 hostList.append(host)
-                self.addLink(switchList[y], hostList[-1], bw=10)
+                self.addLink(switchList[y], hostList[-1], bw=1)
                 counter += 1
             for x in range(self.r):
                 portList.append(y)
@@ -79,7 +79,7 @@ class JellyFishTop(Topo):
                 portList.remove(randPort)
                 portList.remove(currentSwitch)
                 canConnect.remove(randPort)
-                self.addLink(switchList[currentSwitch], switchList[randPort], bw=100)
+                self.addLink(switchList[currentSwitch], switchList[randPort], bw=10)
 
 def experiment(net):
         net.start()
